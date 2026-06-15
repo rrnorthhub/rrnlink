@@ -258,37 +258,61 @@ function checkOverdue(tasks) {
   ).map(t => { t.status = '逾期'; return t; });
 }
 
-// ── 從 Google Sheets 讀取（gviz API）────────────────────────────
+// ── 從 Google Sheets 讀取────────────────────────────────────────
 async function fetchSheets() {
   setSyncStatus('loading', '同步中…');
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&headers=1`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/tq?tqx=out:json&tq=select%20*&gid=0`;
     const res = await fetch(url);
     const text = await res.text();
-    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+    const clean = text.replace(/^[^\(]*\(/, '').replace(/\);\s*$/, '');
+    const json = JSON.parse(clean);
     const rows = json.table.rows;
+
+    console.log('總筆數:', rows.length);
+    console.log('第一筆:', JSON.stringify(rows[0]));
 
     allTasks = rows.map((row, i) => {
       const cells = row.c;
-      const get = (idx) => {
-        const cell = cells[idx];
-        if (!cell) return '';
-        return cell.f || cell.v || '';
+      const getName = () => {
+        const c = cells[0];
+        if (!c) return '';
+        return String(c.f || c.v || '').trim();
       };
-      const name = String(get(0)).trim();
-      const startRaw = cells[2];
-      const endRaw = cells[3];
+      const getStr = (idx) => {
+        const c = cells[idx];
+        if (!c) return '';
+        return String(c.f || c.v || '').trim();
+      };
+      const getDate = (idx) => {
+        const c = cells[idx];
+        if (!c || c.v === null) return '';
+        const v = c.v;
+        const f = c.f;
+        if (f) return normalizeDate(f);
+        if (typeof v === 'string') {
+          if (v.startsWith('Date(')) {
+            const p = v.replace('Date(','').replace(')','').split(',');
+            return `${p[0]}-${String(+p[1]+1).padStart(2,'0')}-${String(+p[2]).padStart(2,'0')}`;
+          }
+          return normalizeDate(v);
+        }
+        return '';
+      };
+
       return {
         id:        i,
-        name:      name,
-        category:  String(get(1)).trim(),
-        startDate: extractDate(startRaw),
-        endDate:   extractDate(endRaw),
-        status:    String(get(4) || '待辦').trim(),
-        person:    String(get(5) || '').trim(),
-        note:      String(get(6) || '').trim(),
+        name:      getName(),
+        category:  getStr(1),
+        startDate: getDate(2),
+        endDate:   getDate(3),
+        status:    getStr(4) || '待辦',
+        person:    getStr(5),
+        note:      getStr(6),
       };
-    }).filter(t => t.name && t.name !== '工項名稱' && t.startDate && t.endDate);
+    }).filter(t => t.name && t.startDate && t.endDate);
+
+    console.log('有效筆數:', allTasks.length);
 
     allTasks.forEach(t => {
       if (t.status !== '完成' && t.endDate < TODAY) t.status = '逾期';
@@ -297,8 +321,8 @@ async function fetchSheets() {
     setSyncStatus('ok', `已同步 ${new Date().toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit'})}`);
     render();
   } catch(e) {
-    setSyncStatus('error', '同步失敗');
-    console.error(e);
+    setSyncStatus('error', '同步失敗：' + e.message);
+    console.error('錯誤:', e);
   }
 }
 
