@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>北輔中心甘特圖</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f7f5f2;--card:#fdfcfa;--dim:#f0ede8;--line:#e8e3dd;--hair:#d8d2cb;
+      --sage:#7a9e8e;--sage-lt:#eef3f0;--sage-dk:#4e7566;
+      --clay:#b07d62;--clay-lt:#f5ede7;
+      --amber:#c49a3c;--amber-lt:#faf3e0;
+      --red:#b05c5c;--red-lt:#f5eaea;
+      --ink:#2c2c2c;--sub:#6b6560;--muted:#a89f96;
+    }
+    body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+
+    /* Header */
+    .header{background:var(--card);border-bottom:1px solid var(--line);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .header-left{display:flex;align-items:center;gap:10px}
+    .header-logo{width:32px;height:32px;border-radius:8px;background:var(--sage);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900}
+    .header-title{font-size:14px;font-weight:800;color:var(--ink)}
+    .header-sub{font-size:10px;color:var(--muted)}
+    .header-right{display:flex;align-items:center;gap:10px}
+    .sync-status{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
+    .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--sage)}
+    .sync-dot.loading{background:var(--amber);animation:pulse 1s infinite}
+    .sync-dot.error{background:var(--red)}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+    .btn-back{padding:5px 12px;border:1px solid var(--line);border-radius:8px;background:transparent;font-size:12px;color:var(--sub);cursor:pointer;font-family:inherit;text-decoration:none;display:flex;align-items:center;gap:4px}
+
+    /* Stats */
+    .stats-bar{padding:14px 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line);background:var(--card)}
+    .stat-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid transparent;transition:all 0.15s;font-size:12px}
+    .stat-pill.active{font-weight:700}
+    .stat-label{color:inherit}
+    .stat-count{font-weight:900;font-size:14px}
+    .today-info{margin-left:auto;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
+    .today-line-icon{width:2px;height:14px;background:var(--red);border-radius:1px;opacity:0.7}
+
+    /* Filter tabs */
+    .filter-bar{padding:12px 24px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);background:var(--dim)}
+    .filter-btn{padding:5px 14px;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:all 0.15s}
+    .filter-btn.active{background:var(--ink);color:#fff;font-weight:700}
+    .filter-btn:not(.active){background:var(--card);color:var(--sub);border:1px solid var(--line)}
+
+    /* Main */
+    .main{max-width:1400px;margin:0 auto;padding:16px 20px 48px}
+
+    /* Gantt table */
+    .gantt-wrap{background:var(--card);border-radius:14px;border:1px solid var(--line);overflow:hidden;box-shadow:0 1px 4px #0001}
+
+    /* Month header */
+    .gantt-header{display:flex;border-bottom:2px solid var(--line);background:var(--dim);position:sticky;top:56px;z-index:10}
+    .col-name{width:220px;flex-shrink:0;padding:10px 16px;border-right:1px solid var(--line);font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px}
+    .col-person{width:90px;flex-shrink:0;padding:10px 8px;border-right:1px solid var(--line);font-size:11px;font-weight:700;color:var(--muted)}
+    .months-wrap{flex:1;display:flex}
+    .month-cell{flex:1;text-align:center;padding:10px 0;font-size:10px;font-weight:600;color:var(--muted);border-right:1px solid var(--line)}
+    .month-cell:last-child{border-right:none}
+    .month-cell.current{background:var(--sage-lt);color:var(--sage-dk);font-weight:800}
+
+    /* Category group */
+    .cat-header{display:flex;align-items:center;background:var(--dim);border-bottom:1px solid var(--line);border-top:1px solid var(--line);cursor:pointer;user-select:none}
+    .cat-label{width:220px;flex-shrink:0;padding:7px 16px;border-right:1px solid var(--line);display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--ink)}
+    .cat-bar{width:3px;height:16px;border-radius:2px;flex-shrink:0}
+    .cat-count{font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-left:auto}
+    .cat-toggle{font-size:11px;color:var(--muted);margin-left:4px}
+    .cat-spacer{flex:1}
+
+    /* Task rows */
+    .task-row{display:flex;align-items:stretch;border-bottom:1px solid var(--line)}
+    .task-row:last-child{border-bottom:none}
+    .task-row:nth-child(even){background:var(--bg)}
+    .task-row:nth-child(odd){background:var(--card)}
+    .task-name-col{width:220px;flex-shrink:0;padding:10px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:3px}
+    .task-name{font-size:12px;font-weight:600;color:var(--ink);line-height:1.4}
+    .task-status{display:flex;align-items:center;gap:4px}
+    .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .status-text{font-size:10px}
+    .task-person-col{width:90px;flex-shrink:0;padding:10px 8px;border-right:1px solid var(--line);display:flex;align-items:center}
+    .person-name{font-size:10px;color:var(--muted);line-height:1.4}
+
+    /* Bar area */
+    .bar-area{flex:1;position:relative;min-height:48px;cursor:pointer}
+    .bar-area:hover{background:rgba(122,158,142,0.04)}
+    .month-grid{position:absolute;top:0;bottom:0;width:1px;background:var(--line);pointer-events:none}
+    .month-grid.current{background:#7a9e8e44;width:100%}
+    .today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--red);opacity:0.6;pointer-events:none;z-index:3}
+    .gantt-bar{position:absolute;top:50%;transform:translateY(-50%);height:20px;border-radius:5px;min-width:4px;z-index:2;display:flex;align-items:center;overflow:hidden}
+    .gantt-bar.done{background-image:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,0.3) 3px,rgba(255,255,255,0.3) 6px)}
+    .bar-label{font-size:9px;font-weight:700;color:#fff;padding-left:7px;white-space:nowrap;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,0.25)}
+
+    /* Tooltip */
+    .tooltip{position:fixed;background:var(--ink);color:#f8fafc;border-radius:10px;padding:12px 16px;width:240px;z-index:9999;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-size:12px;line-height:1.6}
+    .tooltip-title{font-weight:700;margin-bottom:6px;font-size:13px}
+    .tooltip-row{display:flex;gap:6px;color:#94a3b8;font-size:11px}
+    .tooltip-note{margin-top:6px;padding-top:6px;border-top:1px solid #ffffff1a;color:var(--amber);font-size:11px}
+
+    /* Legend */
+    .legend{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--sub)}
+    .legend-item{display:flex;align-items:center;gap:5px}
+    .legend-bar{width:24px;height:10px;border-radius:3px}
+    .legend-done{background-image:repeating-linear-gradient(45deg,var(--sage),var(--sage) 3px,var(--sage-lt) 3px,var(--sage-lt) 6px)}
+
+    /* Empty / Loading */
+    .empty{padding:64px 0;text-align:center;color:var(--muted);font-size:14px}
+    .loading-bar{width:40px;height:40px;border:3px solid var(--line);border-top-color:var(--sage);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Overdue alert */
+    .alert-bar{background:var(--red-lt);border-bottom:1px solid #f0a0a0;padding:10px 24px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--red)}
+    .alert-bar.hidden{display:none}
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <div class="header-logo">北</div>
+    <div>
+      <div class="header-title">北輔中心計畫期程甘特圖</div>
+      <div class="header-sub">115年度地方創生北區輔導中心</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-text">載入中…</span>
+    </div>
+    <a href="/" class="btn-back">← 返回入口</a>
+  </div>
+</div>
+
+<!-- Overdue alert -->
+<div class="alert-bar hidden" id="alert-bar">
+  ⚠️ <span id="alert-text"></span>
+</div>
+
+<!-- Stats -->
+<div class="stats-bar">
+  <div class="stat-pill" id="pill-all" onclick="setFilter('全部')" style="background:var(--dim);border-color:var(--line)">
+    <span class="stat-label" style="color:var(--sub)">全部</span>
+    <span class="stat-count" id="count-all" style="color:var(--ink)">0</span>
+  </div>
+  <div class="stat-pill" onclick="setFilter('完成')" style="background:var(--sage-lt);border-color:var(--sage)">
+    <span class="stat-dot" style="width:7px;height:7px;border-radius:50%;background:var(--sage);display:inline-block"></span>
+    <span class="stat-label" style="color:var(--sage-dk)">完成</span>
+    <span class="stat-count" id="count-done" style="color:var(--sage-dk)">0</span>
+  </div>
+  <div class="stat-pill" onclick="setFilter('執行中')" style="background:var(--clay-lt);border-color:var(--clay)">
+    <span class="stat-dot" style="width:7px;height:7px;border-radius:50%;background:var(--clay);display:inline-block"></span>
+    <span class="stat-label" style="color:var(--clay)">執行中</span>
+    <span class="stat-count" id="count-active" style="color:var(--clay)">0</span>
+  </div>
+  <div class="stat-pill" onclick="setFilter('待辦')" style="background:var(--dim);border-color:var(--hair)">
+    <span class="stat-dot" style="width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block"></span>
+    <span class="stat-label" style="color:var(--muted)">待辦</span>
+    <span class="stat-count" id="count-pending" style="color:var(--muted)">0</span>
+  </div>
+  <div class="stat-pill" onclick="setFilter('逾期')" style="background:var(--red-lt);border-color:var(--red)">
+    <span class="stat-dot" style="width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block"></span>
+    <span class="stat-label" style="color:var(--red)">逾期</span>
+    <span class="stat-count" id="count-overdue" style="color:var(--red)">0</span>
+  </div>
+  <div class="today-info">
+    <div class="today-line-icon"></div>
+    今日 <span id="today-label"></span>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="gantt-wrap" id="gantt-wrap">
+    <div class="empty">
+      <div class="loading-bar"></div>
+      從 Google Sheets 載入資料中…
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span style="font-weight:600;color:var(--muted)">圖例：</span>
+    <div class="legend-item"><div style="width:2px;height:14px;background:var(--red);border-radius:1px;opacity:0.7"></div>今日</div>
+    <div class="legend-item"><div class="legend-bar legend-done"></div>完成</div>
+    <div class="legend-item"><div class="legend-bar" style="background:var(--clay)"></div>執行中</div>
+    <div class="legend-item"><div class="legend-bar" style="background:var(--muted)"></div>待辦</div>
+    <div class="legend-item"><div class="legend-bar" style="background:var(--red)"></div>逾期</div>
+    <span style="margin-left:auto;color:var(--muted)">每5分鐘自動同步 · 滑鼠移至色條查看詳情</span>
+  </div>
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip" style="display:none"></div>
+
+<script>
+// ── 設定 ─────────────────────────────────────────────────────────
+const SHEETS_ID = '1OgljOYoEprfJ7qF5xKyTJ-0-BnWsAPlfevQq6Y9WC1M';
+const SHEET_NAME = 'Sheet1';
+const SYNC_INTERVAL = 5 * 60 * 1000; // 5分鐘
+
+// ── 時間軸 ────────────────────────────────────────────────────────
+const MONTHS = [
+  {label:'5月',date:'2026-05-01'},{label:'6月',date:'2026-06-01'},
+  {label:'7月',date:'2026-07-01'},{label:'8月',date:'2026-08-01'},
+  {label:'9月',date:'2026-09-01'},{label:'10月',date:'2026-10-01'},
+  {label:'11月',date:'2026-11-01'},{label:'12月',date:'2026-12-01'},
+  {label:'116/1月',date:'2027-01-01'},{label:'2月',date:'2027-02-01'},
+  {label:'3月',date:'2027-03-01'},{label:'4月',date:'2027-04-01'},
+];
+const RANGE_START = '2026-05-01';
+const RANGE_END   = '2027-04-30';
+const TOTAL_DAYS  = daysBetween(RANGE_START, RANGE_END);
+const TODAY       = new Date().toISOString().slice(0,10);
+
+function daysBetween(a, b) {
+  return Math.round((new Date(b) - new Date(a)) / 86400000);
+}
+function toX(dateStr) {
+  const d = Math.max(0, daysBetween(RANGE_START, dateStr));
+  return Math.min(100, (d / TOTAL_DAYS) * 100);
+}
+function toW(start, end) {
+  return Math.max(0.5, toX(end) - toX(start));
+}
+
+// ── 狀態設定 ──────────────────────────────────────────────────────
+const STATUS = {
+  '完成':   {bar:'#7a9e8e', dot:'#7a9e8e', text:'#4e7566'},
+  '執行中': {bar:'#b07d62', dot:'#b07d62', text:'#b07d62'},
+  '待辦':   {bar:'#a89f96', dot:'#a89f96', text:'#a89f96'},
+  '逾期':   {bar:'#b05c5c', dot:'#b05c5c', text:'#b05c5c'},
+};
+
+// 類別色條
+const CAT_COLOR = {
+  '行政作業': '#7a9e8e',
+  '區域輔導': '#b07d62',
+  '特色亮點': '#c49a3c',
+  '行銷整合': '#4e7566',
+  '市集活動': '#b07d62',
+  '成果展':   '#7a9e8e',
+  '報告繳交': '#b05c5c',
+};
+
+// ── 資料 ─────────────────────────────────────────────────────────
+let allTasks = [];
+let currentFilter = '全部';
+let collapsed = {};
+
+// ── 自動逾期檢查 ──────────────────────────────────────────────────
+function checkOverdue(tasks) {
+  return tasks.filter(t =>
+    t.status !== '完成' && t.endDate < TODAY
+  ).map(t => { t.status = '逾期'; return t; });
+}
+
+// ── 從 Google Sheets 讀取 ─────────────────────────────────────────
+async function fetchSheets() {
+  setSyncStatus('loading', '同步中…');
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+    const res = await fetch(url);
+    const text = await res.text();
+    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+    const rows = json.table.rows;
+
+    allTasks = rows.map((row, i) => {
+      const cells = row.c;
+      const get = (idx) => cells[idx]?.v ?? '';
+      return {
+        id:        i,
+        name:      get(0),
+        category:  get(1),
+        startDate: get(2) ? formatDate(get(2)) : '',
+        endDate:   get(3) ? formatDate(get(3)) : '',
+        status:    get(4) || '待辦',
+        person:    get(5),
+        note:      get(6),
+      };
+    }).filter(t => t.name && t.startDate && t.endDate);
+
+    // 自動標記逾期
+    allTasks.forEach(t => {
+      if (t.status !== '完成' && t.endDate < TODAY) t.status = '逾期';
+    });
+
+    setSyncStatus('ok', `已同步 ${new Date().toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit'})}`);
+    render();
+  } catch(e) {
+    setSyncStatus('error', '同步失敗，請檢查權限');
+    console.error(e);
+  }
+}
+
+function formatDate(v) {
+  if (typeof v === 'string' && v.match(/^\d{4}-\d{2}-\d{2}$/)) return v;
+  if (typeof v === 'string' && v.startsWith('Date(')) {
+    const parts = v.replace('Date(','').replace(')','').split(',');
+    const y = parts[0], m = String(+parts[1]+1).padStart(2,'0'), d = String(+parts[2]).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+  return v;
+}
+
+function setSyncStatus(type, text) {
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-text');
+  dot.className = 'sync-dot' + (type === 'loading' ? ' loading' : type === 'error' ? ' error' : '');
+  txt.textContent = text;
+}
+
+// ── 篩選 ─────────────────────────────────────────────────────────
+function setFilter(f) {
+  currentFilter = f;
+  render();
+}
+
+// ── 渲染 ─────────────────────────────────────────────────────────
+function render() {
+  const todayX = toX(TODAY);
+  document.getElementById('today-label').textContent = TODAY;
+
+  // Stats
+  const done    = allTasks.filter(t => t.status === '完成').length;
+  const active  = allTasks.filter(t => t.status === '執行中').length;
+  const pending = allTasks.filter(t => t.status === '待辦').length;
+  const overdue = allTasks.filter(t => t.status === '逾期').length;
+  document.getElementById('count-all').textContent     = allTasks.length;
+  document.getElementById('count-done').textContent    = done;
+  document.getElementById('count-active').textContent  = active;
+  document.getElementById('count-pending').textContent = pending;
+  document.getElementById('count-overdue').textContent = overdue;
+
+  // Overdue alert
+  const alertBar = document.getElementById('alert-bar');
+  if (overdue > 0) {
+    const names = allTasks.filter(t=>t.status==='逾期').map(t=>t.name).join('、');
+    document.getElementById('alert-text').textContent = `${overdue} 個項目已逾期：${names}`;
+    alertBar.classList.remove('hidden');
+  } else {
+    alertBar.classList.add('hidden');
+  }
+
+  // Filter
+  const filtered = currentFilter === '全部' ? allTasks : allTasks.filter(t => t.status === currentFilter);
+
+  // Group by category
+  const catMap = {};
+  filtered.forEach(t => {
+    if (!catMap[t.category]) catMap[t.category] = [];
+    catMap[t.category].push(t);
+  });
+  const cats = Object.keys(catMap);
+
+  let html = '';
+
+  // Month header
+  const curMonth = TODAY.slice(0,7);
+  html += `<div class="gantt-header">
+    <div class="col-name">工作項目</div>
+    <div class="col-person">負責人</div>
+    <div class="months-wrap">
+      ${MONTHS.map(m => {
+        const isCur = m.date.startsWith(curMonth.slice(0,4)) && m.date.slice(5,7) === curMonth.slice(5,7);
+        return `<div class="month-cell${isCur?' current':''}">${m.label}</div>`;
+      }).join('')}
+    </div>
+  </div>`;
+
+  if (cats.length === 0) {
+    html += `<div class="empty">沒有符合條件的項目</div>`;
+  } else {
+    cats.forEach(cat => {
+      const items = catMap[cat];
+      const color = CAT_COLOR[cat] || '#7a9e8e';
+      const isCollapsed = collapsed[cat];
+      const bgColor = color + '18';
+      const textColor = color + 'dd';
+
+      html += `<div class="cat-header" onclick="toggleCat('${cat}')">
+        <div class="cat-label">
+          <div class="cat-bar" style="background:${color}"></div>
+          ${cat}
+          <span class="cat-count" style="background:${bgColor};color:${textColor}">${items.length}</span>
+          <span class="cat-toggle">${isCollapsed ? '▶' : '▼'}</span>
+        </div>
+        <div class="cat-spacer"></div>
+      </div>`;
+
+      if (!isCollapsed) {
+        items.forEach((task, idx) => {
+          const cfg = STATUS[task.status] || STATUS['待辦'];
+          const left = toX(task.startDate);
+          const width = toW(task.startDate, task.endDate);
+          const isDone = task.status === '完成';
+          const barColor = CAT_COLOR[task.category] || cfg.bar;
+          const finalBarColor = task.status === '逾期' ? STATUS['逾期'].bar :
+                                task.status === '完成' ? STATUS['完成'].bar : barColor;
+
+          html += `<div class="task-row" onmouseenter="showTip(event,${task.id})" onmouseleave="hideTip()">
+            <div class="task-name-col">
+              <div class="task-name">${task.name}</div>
+              <div class="task-status">
+                <div class="status-dot" style="background:${cfg.dot}"></div>
+                <span class="status-text" style="color:${cfg.text}">${task.status}</span>
+              </div>
+            </div>
+            <div class="task-person-col">
+              <div class="person-name">${task.person || '—'}</div>
+            </div>
+            <div class="bar-area">
+              ${MONTHS.map((m,i) => {
+                const isCur = m.date.startsWith(curMonth.slice(0,4)) && m.date.slice(5,7) === curMonth.slice(5,7);
+                return `<div class="month-grid${isCur?' current':''}" style="left:${(i/MONTHS.length)*100}%;${isCur?`width:${100/MONTHS.length}%;opacity:0.15`:''}"></div>`;
+              }).join('')}
+              ${todayX > 0 && todayX < 100 ? `<div class="today-line" style="left:${todayX}%"></div>` : ''}
+              <div class="gantt-bar${isDone?' done':''}" style="left:${left}%;width:${width}%;background:${finalBarColor};box-shadow:0 1px 4px ${finalBarColor}44">
+                ${width > 6 ? `<span class="bar-label">${task.startDate.slice(5,7)}/${task.startDate.slice(8)}→${task.endDate.slice(5,7)}/${task.endDate.slice(8)}</span>` : ''}
+              </div>
+            </div>
+          </div>`;
+        });
+      }
+    });
+  }
+
+  document.getElementById('gantt-wrap').innerHTML = html;
+}
+
+function toggleCat(cat) {
+  collapsed[cat] = !collapsed[cat];
+  render();
+}
+
+// ── Tooltip ───────────────────────────────────────────────────────
+function showTip(e, id) {
+  const task = allTasks.find(t => t.id === id);
+  if (!task) return;
+  const cfg = STATUS[task.status] || STATUS['待辦'];
+  const tip = document.getElementById('tooltip');
+  tip.innerHTML = `
+    <div class="tooltip-title">${task.name}</div>
+    <div class="tooltip-row">狀態：<span style="color:${cfg.dot};font-weight:700">${task.status}</span></div>
+    <div class="tooltip-row">期間：${task.startDate} → ${task.endDate}</div>
+    <div class="tooltip-row">類別：${task.category}</div>
+    ${task.person ? `<div class="tooltip-row">負責人：${task.person}</div>` : ''}
+    ${task.note ? `<div class="tooltip-note">💬 ${task.note}</div>` : ''}
+  `;
+  tip.style.display = 'block';
+  moveTip(e);
+}
+function moveTip(e) {
+  const tip = document.getElementById('tooltip');
+  const x = Math.min(e.clientX + 14, window.innerWidth - 260);
+  const y = Math.min(e.clientY - 10, window.innerHeight - 200);
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
+}
+function hideTip() {
+  document.getElementById('tooltip').style.display = 'none';
+}
+document.addEventListener('mousemove', e => {
+  if (document.getElementById('tooltip').style.display !== 'none') moveTip(e);
+});
+
+// ── 初始化 ────────────────────────────────────────────────────────
+fetchSheets();
+setInterval(fetchSheets, SYNC_INTERVAL);
+</script>
+</body>
+</html>
