@@ -265,8 +265,9 @@ async function fetchSheets() {
     const url = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/tq?tqx=out:json&tq=select%20*&gid=0`;
     const res = await fetch(url);
     const text = await res.text();
-    const clean = text.replace(/^[^\(]*\(/, '').replace(/\);\s*$/, '');
-    const json = JSON.parse(clean);
+    const match = text.match(/setResponse\((\{[\s\S]*\})\)/);
+    if (!match) throw new Error('無法解析資料');
+    const json = JSON.parse(match[1]);
     const rows = json.table.rows;
 
     console.log('總筆數:', rows.length);
