@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>地方創生北區輔導中心</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── 頂部導覽 ── -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="header-logo">北</span>
+        <div>
+          <div class="header-title">地方創生北區輔導中心</div>
+          <div class="header-sub">Regional Revitalization North Hub</div>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-btn active" onclick="showView('public')">對外入口</button>
+        <button class="nav-btn" onclick="showView('login')">內部工作區</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════
+       對外公開區
+  ══════════════════════════════════ -->
+  <main id="view-public" class="view active">
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-inner">
+        <p class="hero-eyebrow">115年度 · 地方創生北區輔導中心</p>
+        <h1 class="hero-title">協助北區團隊<br/><span class="hero-accent">從提案到落地</span></h1>
+        <p class="hero-desc">提供北區各縣市地方創生提案團隊，從計畫書撰寫、輔導諮詢到成果展現的全程支援。</p>
+        <div class="hero-actions">
+          <a href="#register" class="btn-primary">活動報名</a>
+          <a href="#process" class="btn-ghost">輔導流程</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="container">
+
+      <!-- 服務入口 -->
+      <section class="section">
+        <h2 class="section-title">服務入口</h2>
+        <div class="grid-4">
+          <a href="#process" class="service-card">
+            <div class="service-icon" style="background:#eef3f0;color:#4e7566">輔</div>
+            <div class="service-label">輔導流程</div>
+            <div class="service-desc">了解輔導申請步驟</div>
+          </a>
+          <a href="#register" class="service-card">
+            <div class="service-icon" style="background:#f5ede7;color:#b07d62">活</div>
+            <div class="service-label">活動報名</div>
+            <div class="service-desc">北區交流活動報名</div>
+          </a>
+          <a href="#download" class="service-card">
+            <div class="service-icon" style="background:#faf3e0;color:#c49a3c">文</div>
+            <div class="service-label">文件下載</div>
+            <div class="service-desc">計畫書格式、說明文件</div>
+          </a>
+          <a href="#contact" class="service-card">
+            <div class="service-icon" style="background:#eef3f0;color:#4e7566">聯</div>
+            <div class="service-label">聯絡窗口</div>
+            <div class="service-desc">輔導諮詢聯繫</div>
+          </a>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- 最新公告 -->
+      <section class="section">
+        <div class="section-header">
+          <h2 class="section-title">最新公告</h2>
+          <span class="section-more">查看全部 ›</span>
+        </div>
+        <div class="announce-list">
+          <div class="announce-item">
+            <div class="announce-date"><span class="announce-year">2026</span><span class="announce-day">06.10</span></div>
+            <div class="announce-body">
+              <span class="announce-tag tag-deadline">期限</span>
+              <div class="announce-title">期中報告繳交截止提醒</div>
+              <div class="announce-text">請各單位於6月10日前完成期中報告上傳，逾期將影響核銷進度。</div>
+            </div>
+          </div>
+          <div class="divider-thin"></div>
+          <div class="announce-item">
+            <div class="announce-date"><span class="announce-year">2026</span><span class="announce-day">06.05</span></div>
+            <div class="announce-body">
+              <span class="announce-tag tag-event">活動</span>
+              <div class="announce-title">北區成果交流論壇報名開始</div>
+              <div class="announce-text">7月15日台北舉辦，請各輔導團隊踴躍報名參與。</div>
+            </div>
+          </div>
+          <div class="divider-thin"></div>
+          <div class="announce-item">
+            <div class="announce-date"><span class="announce-year">2026</span><span class="announce-day">05.28</span></div>
+            <div class="announce-body">
+              <span class="announce-tag tag-update">更新</span>
+              <div class="announce-title">115年度計畫書格式更新</div>
+              <div class="announce-text">國發會已更新115年度格式，請下載最新版本使用。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- 輔導流程 -->
+      <section class="section" id="process">
+        <h2 class="section-title">輔導流程</h2>
+        <div class="process-steps">
+          <div class="process-step">
+            <div class="process-num">01</div>
+            <div class="process-label">來電諮詢</div>
+            <div class="process-desc">聯繫北輔中心，說明提案方向與需求</div>
+          </div>
+          <div class="process-arrow">›</div>
+          <div class="process-step">
+            <div class="process-num">02</div>
+            <div class="process-label">填寫聯繫表單</div>
+            <div class="process-desc">填寫基本資料與提案內容</div>
+          </div>
+          <div class="process-arrow">›</div>
+          <div class="process-step">
+            <div class="process-num">03</div>
+            <div class="process-label">初步輔導</div>
+            <div class="process-desc">陪伴員協助釐清方向、媒合資源</div>
+          </div>
+          <div class="process-arrow">›</div>
+          <div class="process-step">
+            <div class="process-num">04</div>
+            <div class="process-label">提案送件</div>
+            <div class="process-desc">協助計畫書撰寫與送審</div>
+          </div>
+          <div class="process-arrow">›</div>
+          <div class="process-step">
+            <div class="process-num">05</div>
+            <div class="process-label">持續追蹤</div>
+            <div class="process-desc">核定後持續輔導執行與成果</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- 活動報名 -->
+      <section class="section" id="register">
+        <h2 class="section-title">活動報名</h2>
+        <div class="form-placeholder">
+          <p class="form-hint">以下為 Google Forms 報名表單嵌入區域</p>
+          <div class="form-embed-box">
+            <!-- 將 Google Forms 的 iframe 嵌入碼貼在這裡 -->
+            <p style="color:#a89f96;font-size:14px;text-align:center;padding:48px 0;">
+              活動報名表單<br/>
+              <span style="font-size:12px">（待嵌入 Google Forms）</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- 文件下載 -->
+      <section class="section" id="download">
+        <h2 class="section-title">文件下載</h2>
+        <div class="download-grid">
+
+          <div class="download-folder">
+            <div class="folder-header">
+              <span class="folder-icon">📁</span>
+              <span class="folder-name">各部會提案計畫（官方下載版）</span>
+            </div>
+            <div class="folder-items">
+              <p class="folder-desc">收錄各部會地方創生相關計畫官方文件，點擊下方按鈕進入資料夾瀏覽下載。</p>
+              <a href="https://drive.google.com/drive/folders/1hBQZu9TEb7HIMNzYPlTym0tzGNF8ZsSh?usp=sharing" target="_blank" class="folder-item folder-more">
+                <span class="file-icon">📂</span>開啟資料夾 ›
+              </a>
+            </div>
+          </div>
+
+          <div class="download-folder">
+            <div class="folder-header">
+              <span class="folder-icon">📁</span>
+              <span class="folder-name">各式簡報公版 + 檢核表（參考用）</span>
+            </div>
+            <div class="folder-items">
+              <p class="folder-desc">提供提案簡報公版及自我檢核表，供各團隊撰寫計畫書時參考使用。</p>
+              <a href="https://drive.google.com/drive/folders/1xC-V1EIZS_Xglio5OvIOBrxVI4gTa_0d?usp=drive_link" target="_blank" class="folder-item folder-more">
+                <span class="file-icon">📂</span>開啟資料夾 ›
+              </a>
+            </div>
+          </div>
+
+          <div class="download-folder">
+            <div class="folder-header">
+              <span class="folder-icon">📝</span>
+              <span class="folder-name">聯繫資訊填寫表</span>
+            </div>
+            <div class="folder-items">
+              <p class="folder-desc">請填寫團隊基本聯繫資料，送出後將由輔導員與您聯繫。</p>
+              <a href="#" class="btn-primary" style="display:inline-block;margin-top:8px">填寫聯繫資料</a>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <!-- 聯絡窗口 -->
+      <section class="section" id="contact">
+        <h2 class="section-title">聯絡窗口</h2>
+        <div class="contact-card">
+          <div class="contact-item">
+            <span class="contact-label">單位名稱</span>
+            <span class="contact-value">
+              地方創生北區輔導中心（115）
+              <span style="display:block;font-size:12px;color:#a89f96;margin-top:2px">共創設計有限公司</span>
+            </span>
+          </div>
+          <div class="divider-thin"></div>
+          <div class="contact-item">
+            <span class="contact-label">服務縣市</span>
+            <span class="contact-value">臺北市・基隆市・新北市・桃園市・新竹縣・新竹市・金門縣・連江縣</span>
+          </div>
+          <div class="divider-thin"></div>
+          <div class="contact-item">
+            <span class="contact-label">聯絡信箱</span>
+            <span class="contact-value">rrnorthhub@gmail.com</span>
+          </div>
+          <div class="divider-thin"></div>
+          <div class="contact-item">
+            <span class="contact-label">辦公時間</span>
+            <span class="contact-value">週一至週五 09:00 – 18:00</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════
+       登入頁
+  ══════════════════════════════════ -->
+  <main id="view-login" class="view">
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="login-logo">北</div>
+        <h2 class="login-title">內部工作區</h2>
+        <p class="login-sub">請輸入密碼進入</p>
+        <input type="password" id="pwd-input" class="login-input" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')checkPwd()" />
+        <button class="btn-primary login-btn" onclick="checkPwd()">進入</button>
+        <p id="pwd-error" class="login-error" style="display:none">密碼錯誤，請再試一次</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════
+       內部工作區
+  ══════════════════════════════════ -->
+  <main id="view-internal" class="view">
+    <div class="container" style="padding-top:32px">
+
+      <div class="internal-header">
+        <div>
+          <p class="eyebrow">內部工作區</p>
+          <h2 class="internal-title">北輔中心工作儀表板</h2>
+        </div>
+        <button class="btn-ghost-sm" onclick="logout()">登出</button>
+      </div>
+
+      <!-- 快速入口 -->
+      <div class="grid-3" style="margin-bottom:32px">
+        <a href="gantt.html" class="internal-card">
+          <div class="internal-icon">程</div>
+          <div class="internal-label">甘特圖</div>
+          <div class="internal-desc">計畫時程總覽</div>
+        </a>
+        <div class="internal-card" onclick="alert('來電紀錄系統建置中')">
+          <div class="internal-icon">電</div>
+          <div class="internal-label">來電紀錄</div>
+          <div class="internal-desc">接電話時即時填寫 + AI判讀</div>
+          <span class="badge-new">即將上線</span>
+        </div>
+        <div class="internal-card" onclick="alert('提案追蹤系統建置中')">
+          <div class="internal-icon">提</div>
+          <div class="internal-label">提案追蹤</div>
+          <div class="internal-desc">自動寫入 Sheets</div>
+          <span class="badge-new">即將上線</span>
+        </div>
+        <div class="internal-card" onclick="alert('過案追蹤系統建置中')">
+          <div class="internal-icon">過</div>
+          <div class="internal-label">過案追蹤</div>
+          <div class="internal-desc">自動寫入 Sheets</div>
+          <span class="badge-new">即將上線</span>
+        </div>
+        <div class="internal-card" onclick="alert('工作日誌系統建置中')">
+          <div class="internal-icon">誌</div>
+          <div class="internal-label">工作日誌</div>
+          <div class="internal-desc">自動寫入 Sheets</div>
+          <span class="badge-new">即將上線</span>
+        </div>
+        <div class="internal-card" onclick="alert('AI初審系統建置中')">
+          <div class="internal-icon">審</div>
+          <div class="internal-label">提案 AI 初審</div>
+          <div class="internal-desc">上傳 PDF · 對照政府標準</div>
+          <span class="badge-new">即將上線</span>
+        </div>
+        <div class="internal-card" onclick="alert('月報系統建置中')">
+          <div class="internal-icon">報</div>
+          <div class="internal-label">月報自動產出</div>
+          <div class="internal-desc">Notion + Sheets → Apps Script</div>
+          <span class="badge-new">即將上線</span>
+        </div>
+        <a href="https://notion.so" target="_blank" class="internal-card">
+          <div class="internal-icon">務</div>
+          <div class="internal-label">Notion 工作區</div>
+          <div class="internal-desc">直接跳轉</div>
+        </a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>© 2026 地方創生北區輔導中心 · 115年度計畫</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
