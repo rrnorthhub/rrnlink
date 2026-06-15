@@ -80,7 +80,7 @@ body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:
 .loading-wrap{padding:60px 0;text-align:center;color:var(--muted);font-size:13px}
 .spinner{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--sage);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.alert{background:var(--red-lt);border-bottom:1px solid #f0a0a0;padding:9px 20px;font-size:12px;color:var(--red);display:none}
+.alert{background:var(--amber-lt);border-bottom:1px solid #f0c060;padding:10px 20px;font-size:12px;color:var(--ink);display:none;line-height:1.8}
 </style>
 </head>
 <body>
@@ -121,6 +121,10 @@ body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:
     <div style="width:7px;height:7px;border-radius:50%;background:var(--red)"></div>
     <span style="color:var(--red)">逾期</span><span id="c-over" style="font-weight:900;color:var(--red)">0</span>
   </div>
+  <div class="pill" onclick="setF('即將到期')" style="background:var(--amber-lt);border-color:var(--amber)">
+    <div style="width:7px;height:7px;border-radius:50%;background:var(--amber)"></div>
+    <span style="color:var(--amber)">即將到期</span><span id="c-warn" style="font-weight:900;color:var(--amber)">0</span>
+  </div>
   <div class="today-info"><div class="tline-icon"></div>今日 <span id="today-lbl"></span></div>
 </div>
 
@@ -134,6 +138,7 @@ body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:
     <div class="li"><div style="width:22px;height:10px;border-radius:3px;background-image:repeating-linear-gradient(45deg,var(--sage),var(--sage) 3px,var(--sage-lt) 3px,var(--sage-lt) 6px)"></div>完成</div>
     <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--clay)"></div>執行中</div>
     <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--muted)"></div>待辦</div>
+    <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--amber)"></div>即將到期</div>
     <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--red)"></div>逾期</div>
     <span style="margin-left:auto;color:var(--muted)">每5分鐘自動同步 · 滑鼠移至色條查看詳情</span>
   </div>
@@ -153,12 +158,13 @@ const RS = '2026-05-01', RE = '2027-04-30';
 const TD = Math.round((new Date(RE)-new Date(RS))/86400000);
 const TODAY = new Date().toISOString().slice(0,10);
 const CAT_C = {'行政作業':'#7a9e8e','區域輔導':'#b07d62','特色亮點':'#c49a3c','行銷整合':'#4e7566','市集活動':'#b07d62','成果展':'#7a9e8e','報告繳交':'#b05c5c'};
-const ST_C = {'完成':'#7a9e8e','執行中':'#b07d62','待辦':'#a89f96','逾期':'#b05c5c'};
+const ST_C = {'完成':'#7a9e8e','執行中':'#b07d62','待辦':'#a89f96','逾期':'#b05c5c','即將到期':'#c49a3c'};
 
 let tasks=[], filt='', coll={};
 
 function toX(d){return Math.min(100,Math.max(0,(new Date(d)-new Date(RS))/86400000/TD*100));}
 function toW(s,e){return Math.max(.5,toX(e)-toX(s));}
+function daysLeft(e){return Math.round((new Date(e)-new Date(TODAY))/86400000);}
 
 function parseGDate(v){
   if(!v) return '';
@@ -184,7 +190,12 @@ async function load(){
       const gd=idx=>c[idx]?parseGDate(String(c[idx].v||'')):'';
       return{id:i,name:g(0),cat:g(1),s:gd(2),e:gd(3),st:g(4)||'待辦',p:g(5),n:g(6)};
     }).filter(t=>t.name&&t.s&&t.e);
-    tasks.forEach(t=>{if(t.st!=='完成'&&t.e<TODAY)t.st='逾期';});
+    tasks.forEach(t=>{
+      if(t.st!=='完成'){
+        if(t.e<TODAY) t.st='逾期';
+        else if(daysLeft(t.e)<=14) t.st='即將到期';
+      }
+    });
     setSt('ok','已同步 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
     render();
   }catch(e){
@@ -206,17 +217,20 @@ function render(){
   const act=tasks.filter(t=>t.st==='執行中').length;
   const pend=tasks.filter(t=>t.st==='待辦').length;
   const over=tasks.filter(t=>t.st==='逾期').length;
+  const warn=tasks.filter(t=>t.st==='即將到期').length;
   document.getElementById('c-all').textContent=tasks.length;
   document.getElementById('c-done').textContent=done;
   document.getElementById('c-act').textContent=act;
   document.getElementById('c-pend').textContent=pend;
   document.getElementById('c-over').textContent=over;
+  document.getElementById('c-warn').textContent=warn;
 
   const al=document.getElementById('alert');
-  if(over>0){
-    al.textContent='⚠️ 逾期項目：'+tasks.filter(t=>t.st==='逾期').map(t=>t.name).join('、');
-    al.style.display='block';
-  } else al.style.display='none';
+  let alertHtml='';
+  if(over>0) alertHtml+=`<div style="margin-bottom:${warn?'6px':'0'}">🔴 逾期 ${over} 項：${tasks.filter(t=>t.st==='逾期').map(t=>t.name).join('、')}</div>`;
+  if(warn>0) alertHtml+=`<div>⏰ 即將到期（14天內）${warn} 項：${tasks.filter(t=>t.st==='即將到期').map(t=>t.name+'（剩'+daysLeft(t.e)+'天）').join('、')}</div>`;
+  if(alertHtml){al.innerHTML=alertHtml;al.style.display='block';}
+  else al.style.display='none';
 
   const shown=filt?tasks.filter(t=>t.st===filt):tasks;
   const catMap={};
