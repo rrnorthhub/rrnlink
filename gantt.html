@@ -1,504 +1,274 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>北輔中心甘特圖</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet"/>
-  <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{
-      --bg:#f7f5f2;--card:#fdfcfa;--dim:#f0ede8;--line:#e8e3dd;--hair:#d8d2cb;
-      --sage:#7a9e8e;--sage-lt:#eef3f0;--sage-dk:#4e7566;
-      --clay:#b07d62;--clay-lt:#f5ede7;
-      --amber:#c49a3c;--amber-lt:#faf3e0;
-      --red:#b05c5c;--red-lt:#f5eaea;
-      --ink:#2c2c2c;--sub:#6b6560;--muted:#a89f96;
-    }
-    body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
-
-    /* Header */
-    .header{background:var(--card);border-bottom:1px solid var(--line);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-    .header-left{display:flex;align-items:center;gap:10px}
-    .header-logo{width:32px;height:32px;border-radius:8px;background:var(--sage);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900}
-    .header-title{font-size:14px;font-weight:800;color:var(--ink)}
-    .header-sub{font-size:10px;color:var(--muted)}
-    .header-right{display:flex;align-items:center;gap:10px}
-    .sync-status{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
-    .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--sage)}
-    .sync-dot.loading{background:var(--amber);animation:pulse 1s infinite}
-    .sync-dot.error{background:var(--red)}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-    .btn-back{padding:5px 12px;border:1px solid var(--line);border-radius:8px;background:transparent;font-size:12px;color:var(--sub);cursor:pointer;font-family:inherit;text-decoration:none;display:flex;align-items:center;gap:4px}
-
-    /* Stats */
-    .stats-bar{padding:14px 24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line);background:var(--card)}
-    .stat-pill{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid transparent;transition:all 0.15s;font-size:12px}
-    .stat-pill.active{font-weight:700}
-    .stat-label{color:inherit}
-    .stat-count{font-weight:900;font-size:14px}
-    .today-info{margin-left:auto;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
-    .today-line-icon{width:2px;height:14px;background:var(--red);border-radius:1px;opacity:0.7}
-
-    /* Filter tabs */
-    .filter-bar{padding:12px 24px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);background:var(--dim)}
-    .filter-btn{padding:5px 14px;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;transition:all 0.15s}
-    .filter-btn.active{background:var(--ink);color:#fff;font-weight:700}
-    .filter-btn:not(.active){background:var(--card);color:var(--sub);border:1px solid var(--line)}
-
-    /* Main */
-    .main{max-width:1400px;margin:0 auto;padding:16px 20px 48px}
-
-    /* Gantt table */
-    .gantt-wrap{background:var(--card);border-radius:14px;border:1px solid var(--line);overflow:hidden;box-shadow:0 1px 4px #0001}
-
-    /* Month header */
-    .gantt-header{display:flex;border-bottom:2px solid var(--line);background:var(--dim);position:sticky;top:56px;z-index:10}
-    .col-name{width:280px;flex-shrink:0;padding:10px 16px;border-right:1px solid var(--line);font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px}
-    .col-person{width:120px;flex-shrink:0;padding:10px 8px;border-right:1px solid var(--line);font-size:11px;font-weight:700;color:var(--muted)}
-    .months-wrap{flex:1;display:flex}
-    .month-cell{flex:1;text-align:center;padding:10px 0;font-size:10px;font-weight:600;color:var(--muted);border-right:1px solid var(--line)}
-    .month-cell:last-child{border-right:none}
-    .month-cell.current{background:var(--sage-lt);color:var(--sage-dk);font-weight:800}
-
-    /* Category group */
-    .cat-header{display:flex;align-items:center;background:var(--dim);border-bottom:1px solid var(--line);border-top:1px solid var(--line);cursor:pointer;user-select:none}
-    .cat-label{width:400px;flex-shrink:0;padding:7px 16px;border-right:1px solid var(--line);display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--ink);white-space:nowrap}
-    .cat-bar{width:3px;height:16px;border-radius:2px;flex-shrink:0}
-    .cat-count{font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px}
-    .cat-toggle{font-size:11px;color:var(--muted);margin-left:6px}
-    .cat-person-spacer{display:none}
-    .cat-bar-spacer{flex:1}
-
-    /* Task rows */
-    .task-row{display:flex;align-items:stretch;border-bottom:1px solid var(--line)}
-    .task-row:last-child{border-bottom:none}
-    .task-row:nth-child(even){background:var(--bg)}
-    .task-row:nth-child(odd){background:var(--card)}
-    .task-name-col{width:280px;flex-shrink:0;padding:10px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:3px}
-    .task-name{font-size:12px;font-weight:600;color:var(--ink);line-height:1.4}
-    .task-status{display:flex;align-items:center;gap:4px}
-    .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-    .status-text{font-size:10px}
-    .task-person-col{width:120px;flex-shrink:0;padding:10px 8px;border-right:1px solid var(--line);display:flex;align-items:center}
-    .person-name{font-size:10px;color:var(--muted);line-height:1.4}
-
-    /* Bar area */
-    .bar-area{flex:1;position:relative;min-height:48px;cursor:pointer}
-    .bar-area:hover{background:rgba(122,158,142,0.04)}
-    .month-grid{position:absolute;top:0;bottom:0;width:1px;background:var(--line);pointer-events:none}
-    .month-grid.current{background:#7a9e8e44;width:100%}
-    .today-line{position:absolute;top:0;bottom:0;width:2px;background:var(--red);opacity:0.6;pointer-events:none;z-index:3}
-    .gantt-bar{position:absolute;top:50%;transform:translateY(-50%);height:20px;border-radius:5px;min-width:4px;z-index:2;display:flex;align-items:center;overflow:hidden}
-    .gantt-bar.done{background-image:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,0.3) 3px,rgba(255,255,255,0.3) 6px)}
-    .bar-label{font-size:9px;font-weight:700;color:#fff;padding-left:7px;white-space:nowrap;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,0.25)}
-
-    /* Tooltip */
-    .tooltip{position:fixed;background:var(--ink);color:#f8fafc;border-radius:10px;padding:12px 16px;width:240px;z-index:9999;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-size:12px;line-height:1.6}
-    .tooltip-title{font-weight:700;margin-bottom:6px;font-size:13px}
-    .tooltip-row{display:flex;gap:6px;color:#94a3b8;font-size:11px}
-    .tooltip-note{margin-top:6px;padding-top:6px;border-top:1px solid #ffffff1a;color:var(--amber);font-size:11px}
-
-    /* Legend */
-    .legend{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--sub)}
-    .legend-item{display:flex;align-items:center;gap:5px}
-    .legend-bar{width:24px;height:10px;border-radius:3px}
-    .legend-done{background-image:repeating-linear-gradient(45deg,var(--sage),var(--sage) 3px,var(--sage-lt) 3px,var(--sage-lt) 6px)}
-
-    /* Empty / Loading */
-    .empty{padding:64px 0;text-align:center;color:var(--muted);font-size:14px}
-    .loading-bar{width:40px;height:40px;border:3px solid var(--line);border-top-color:var(--sage);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    /* Overdue alert */
-    .alert-bar{background:var(--red-lt);border-bottom:1px solid #f0a0a0;padding:10px 24px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--red)}
-    .alert-bar.hidden{display:none}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>北輔中心甘特圖</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f5f2;--card:#fdfcfa;--dim:#f0ede8;--line:#e8e3dd;
+  --sage:#7a9e8e;--sage-lt:#eef3f0;--sage-dk:#4e7566;
+  --clay:#b07d62;--clay-lt:#f5ede7;
+  --amber:#c49a3c;--amber-lt:#faf3e0;
+  --red:#b05c5c;--red-lt:#f5eaea;
+  --ink:#2c2c2c;--sub:#6b6560;--muted:#a89f96;
+}
+body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.header{background:var(--card);border-bottom:1px solid var(--line);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--sage);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;margin-right:10px}
+.h-title{font-size:14px;font-weight:800;color:var(--ink)}
+.h-sub{font-size:10px;color:var(--muted)}
+.sync{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--sage)}
+.sdot.loading{background:var(--amber);animation:pulse 1s infinite}
+.sdot.error{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.btn-back{padding:5px 12px;border:1px solid var(--line);border-radius:8px;background:transparent;font-size:12px;color:var(--sub);cursor:pointer;text-decoration:none}
+.stats{padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line);background:var(--card)}
+.pill{display:flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid transparent;font-size:12px}
+.today-info{margin-left:auto;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.tline-icon{width:2px;height:14px;background:var(--red);border-radius:1px;opacity:.7}
+.wrap{max-width:1400px;margin:0 auto;padding:16px 20px 48px}
+.gantt{background:var(--card);border-radius:12px;border:1px solid var(--line);overflow:hidden}
+/* 固定欄位寬度 */
+.col-n{width:260px;min-width:260px;max-width:260px;flex-shrink:0;padding:10px 14px;border-right:1px solid var(--line)}
+.col-p{width:110px;min-width:110px;max-width:110px;flex-shrink:0;padding:10px 8px;border-right:1px solid var(--line)}
+.col-b{flex:1;position:relative}
+/* Header row */
+.g-header{display:flex;background:var(--dim);border-bottom:2px solid var(--line);position:sticky;top:52px;z-index:10}
+.g-header .col-n{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;display:flex;align-items:center}
+.g-header .col-p{font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center}
+.months{flex:1;display:flex}
+.month{flex:1;text-align:center;padding:10px 0;font-size:10px;font-weight:600;color:var(--muted);border-right:1px solid var(--line)}
+.month:last-child{border-right:none}
+.month.cur{background:var(--sage-lt);color:var(--sage-dk);font-weight:800}
+/* Cat header */
+.cat-row{display:flex;align-items:center;background:var(--dim);border-bottom:1px solid var(--line);border-top:1px solid var(--line);cursor:pointer;user-select:none;min-height:36px}
+.cat-label{width:370px;min-width:370px;flex-shrink:0;padding:7px 14px;border-right:1px solid var(--line);display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--ink)}
+.cat-bar{width:3px;height:14px;border-radius:2px;flex-shrink:0}
+.cat-badge{font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px}
+.cat-arrow{font-size:11px;color:var(--muted);margin-left:auto}
+.cat-spacer{flex:1}
+/* Task row */
+.task-row{display:flex;align-items:stretch;border-bottom:1px solid var(--line)}
+.task-row:last-child{border-bottom:none}
+.task-row:nth-child(odd){background:var(--card)}
+.task-row:nth-child(even){background:var(--bg)}
+.task-name{font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.task-st{display:flex;align-items:center;gap:4px;margin-top:3px}
+.sdot2{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.st-text{font-size:10px}
+.person{font-size:10px;color:var(--muted);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+/* Bar area */
+.bar-area{flex:1;position:relative;min-height:52px;cursor:pointer}
+.bar-area:hover{background:rgba(122,158,142,.04)}
+.mgrid{position:absolute;top:0;bottom:0;width:1px;background:var(--line);pointer-events:none}
+.mgrid.cur{width:100%;background:rgba(122,158,142,.08)}
+.tday{position:absolute;top:0;bottom:0;width:2px;background:var(--red);opacity:.6;pointer-events:none;z-index:3}
+.gbar{position:absolute;top:50%;transform:translateY(-50%);height:20px;border-radius:5px;min-width:4px;z-index:2;display:flex;align-items:center;overflow:hidden}
+.gbar.done{background-image:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,.3) 3px,rgba(255,255,255,.3) 6px)}
+.blabel{font-size:9px;font-weight:700;color:#fff;padding-left:6px;white-space:nowrap;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+/* Tooltip */
+.tip{position:fixed;background:var(--ink);color:#f8fafc;border-radius:10px;padding:12px 14px;width:230px;z-index:9999;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.3);font-size:11px;line-height:1.6;display:none}
+.tip-title{font-weight:700;font-size:13px;margin-bottom:6px}
+/* Legend */
+.legend{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--sub)}
+.li{display:flex;align-items:center;gap:4px}
+/* Loading */
+.loading-wrap{padding:60px 0;text-align:center;color:var(--muted);font-size:13px}
+.spinner{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--sage);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.alert{background:var(--red-lt);border-bottom:1px solid #f0a0a0;padding:9px 20px;font-size:12px;color:var(--red);display:none}
+</style>
 </head>
 <body>
 
-<!-- Header -->
 <div class="header">
-  <div class="header-left">
-    <div class="header-logo">北</div>
+  <div style="display:flex;align-items:center">
+    <div class="logo">北</div>
     <div>
-      <div class="header-title">北輔中心計畫期程甘特圖</div>
-      <div class="header-sub">115年度地方創生北區輔導中心</div>
+      <div class="h-title">北輔中心計畫期程甘特圖</div>
+      <div class="h-sub">115年度地方創生北區輔導中心</div>
     </div>
   </div>
-  <div class="header-right">
-    <div class="sync-status">
-      <div class="sync-dot" id="sync-dot"></div>
-      <span id="sync-text">載入中…</span>
-    </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div class="sync"><div class="sdot" id="sd"></div><span id="st">載入中…</span></div>
     <a href="/" class="btn-back">← 返回入口</a>
   </div>
 </div>
 
-<!-- Overdue alert -->
-<div class="alert-bar hidden" id="alert-bar">
-  ⚠️ <span id="alert-text"></span>
+<div class="alert" id="alert"></div>
+
+<div class="stats">
+  <div class="pill" onclick="setF('')" style="background:var(--dim);border-color:var(--line)">
+    <span style="color:var(--sub)">全部</span><span id="c-all" style="font-weight:900;color:var(--ink)">0</span>
+  </div>
+  <div class="pill" onclick="setF('完成')" style="background:var(--sage-lt);border-color:var(--sage)">
+    <div style="width:7px;height:7px;border-radius:50%;background:var(--sage)"></div>
+    <span style="color:var(--sage-dk)">完成</span><span id="c-done" style="font-weight:900;color:var(--sage-dk)">0</span>
+  </div>
+  <div class="pill" onclick="setF('執行中')" style="background:var(--clay-lt);border-color:var(--clay)">
+    <div style="width:7px;height:7px;border-radius:50%;background:var(--clay)"></div>
+    <span style="color:var(--clay)">執行中</span><span id="c-act" style="font-weight:900;color:var(--clay)">0</span>
+  </div>
+  <div class="pill" onclick="setF('待辦')" style="background:var(--dim);border-color:var(--line)">
+    <div style="width:7px;height:7px;border-radius:50%;background:var(--muted)"></div>
+    <span style="color:var(--muted)">待辦</span><span id="c-pend" style="font-weight:900;color:var(--muted)">0</span>
+  </div>
+  <div class="pill" onclick="setF('逾期')" style="background:var(--red-lt);border-color:var(--red)">
+    <div style="width:7px;height:7px;border-radius:50%;background:var(--red)"></div>
+    <span style="color:var(--red)">逾期</span><span id="c-over" style="font-weight:900;color:var(--red)">0</span>
+  </div>
+  <div class="today-info"><div class="tline-icon"></div>今日 <span id="today-lbl"></span></div>
 </div>
 
-<!-- Stats -->
-<div class="stats-bar">
-  <div class="stat-pill" id="pill-all" onclick="setFilter('全部')" style="background:var(--dim);border-color:var(--line)">
-    <span class="stat-label" style="color:var(--sub)">全部</span>
-    <span class="stat-count" id="count-all" style="color:var(--ink)">0</span>
+<div class="wrap">
+  <div class="gantt" id="gantt">
+    <div class="loading-wrap"><div class="spinner"></div>從 Google Sheets 載入資料中…</div>
   </div>
-  <div class="stat-pill" onclick="setFilter('完成')" style="background:var(--sage-lt);border-color:var(--sage)">
-    <span class="stat-dot" style="width:7px;height:7px;border-radius:50%;background:var(--sage);display:inline-block"></span>
-    <span class="stat-label" style="color:var(--sage-dk)">完成</span>
-    <span class="stat-count" id="count-done" style="color:var(--sage-dk)">0</span>
-  </div>
-  <div class="stat-pill" onclick="setFilter('執行中')" style="background:var(--clay-lt);border-color:var(--clay)">
-    <span class="stat-dot" style="width:7px;height:7px;border-radius:50%;background:var(--clay);display:inline-block"></span>
-    <span class="stat-label" style="color:var(--clay)">執行中</span>
-    <span class="stat-count" id="count-active" style="color:var(--clay)">0</span>
-  </div>
-  <div class="stat-pill" onclick="setFilter('待辦')" style="background:var(--dim);border-color:var(--hair)">
-    <span class="stat-dot" style="width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block"></span>
-    <span class="stat-label" style="color:var(--muted)">待辦</span>
-    <span class="stat-count" id="count-pending" style="color:var(--muted)">0</span>
-  </div>
-  <div class="stat-pill" onclick="setFilter('逾期')" style="background:var(--red-lt);border-color:var(--red)">
-    <span class="stat-dot" style="width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block"></span>
-    <span class="stat-label" style="color:var(--red)">逾期</span>
-    <span class="stat-count" id="count-overdue" style="color:var(--red)">0</span>
-  </div>
-  <div class="today-info">
-    <div class="today-line-icon"></div>
-    今日 <span id="today-label"></span>
-  </div>
-</div>
-
-<!-- Main -->
-<div class="main">
-  <div class="gantt-wrap" id="gantt-wrap">
-    <div class="empty">
-      <div class="loading-bar"></div>
-      從 Google Sheets 載入資料中…
-    </div>
-  </div>
-
-  <!-- Legend -->
   <div class="legend">
     <span style="font-weight:600;color:var(--muted)">圖例：</span>
-    <div class="legend-item"><div style="width:2px;height:14px;background:var(--red);border-radius:1px;opacity:0.7"></div>今日</div>
-    <div class="legend-item"><div class="legend-bar legend-done"></div>完成</div>
-    <div class="legend-item"><div class="legend-bar" style="background:var(--clay)"></div>執行中</div>
-    <div class="legend-item"><div class="legend-bar" style="background:var(--muted)"></div>待辦</div>
-    <div class="legend-item"><div class="legend-bar" style="background:var(--red)"></div>逾期</div>
+    <div class="li"><div style="width:2px;height:14px;background:var(--red);border-radius:1px;opacity:.7"></div>今日</div>
+    <div class="li"><div style="width:22px;height:10px;border-radius:3px;background-image:repeating-linear-gradient(45deg,var(--sage),var(--sage) 3px,var(--sage-lt) 3px,var(--sage-lt) 6px)"></div>完成</div>
+    <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--clay)"></div>執行中</div>
+    <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--muted)"></div>待辦</div>
+    <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--red)"></div>逾期</div>
     <span style="margin-left:auto;color:var(--muted)">每5分鐘自動同步 · 滑鼠移至色條查看詳情</span>
   </div>
 </div>
 
-<!-- Tooltip -->
-<div class="tooltip" id="tooltip" style="display:none"></div>
+<div class="tip" id="tip"></div>
 
 <script>
-// ── 設定 ─────────────────────────────────────────────────────────
-const SHEETS_ID = '1OgljOYoEprfJ7qF5xKyTJ-0-BnWsAPlfevQq6Y9WC1M';
-const SHEET_NAME = 'gantt-data';
-const SYNC_INTERVAL = 5 * 60 * 1000; // 5分鐘
-
-// ── 時間軸 ────────────────────────────────────────────────────────
+const SID = '1OgljOYoEprfJ7qF5xKyTJ-0-BnWsAPlfevQq6Y9WC1M';
 const MONTHS = [
-  {label:'5月',date:'2026-05-01'},{label:'6月',date:'2026-06-01'},
-  {label:'7月',date:'2026-07-01'},{label:'8月',date:'2026-08-01'},
-  {label:'9月',date:'2026-09-01'},{label:'10月',date:'2026-10-01'},
-  {label:'11月',date:'2026-11-01'},{label:'12月',date:'2026-12-01'},
-  {label:'116/1月',date:'2027-01-01'},{label:'2月',date:'2027-02-01'},
-  {label:'3月',date:'2027-03-01'},{label:'4月',date:'2027-04-01'},
+  {l:'5月',d:'2026-05-01'},{l:'6月',d:'2026-06-01'},{l:'7月',d:'2026-07-01'},
+  {l:'8月',d:'2026-08-01'},{l:'9月',d:'2026-09-01'},{l:'10月',d:'2026-10-01'},
+  {l:'11月',d:'2026-11-01'},{l:'12月',d:'2026-12-01'},{l:'116/1',d:'2027-01-01'},
+  {l:'2月',d:'2027-02-01'},{l:'3月',d:'2027-03-01'},{l:'4月',d:'2027-04-01'},
 ];
-const RANGE_START = '2026-05-01';
-const RANGE_END   = '2027-04-30';
-const TOTAL_DAYS  = daysBetween(RANGE_START, RANGE_END);
-const TODAY       = new Date().toISOString().slice(0,10);
+const RS = '2026-05-01', RE = '2027-04-30';
+const TD = Math.round((new Date(RE)-new Date(RS))/86400000);
+const TODAY = new Date().toISOString().slice(0,10);
+const CAT_C = {'行政作業':'#7a9e8e','區域輔導':'#b07d62','特色亮點':'#c49a3c','行銷整合':'#4e7566','市集活動':'#b07d62','成果展':'#7a9e8e','報告繳交':'#b05c5c'};
+const ST_C = {'完成':'#7a9e8e','執行中':'#b07d62','待辦':'#a89f96','逾期':'#b05c5c'};
 
-function daysBetween(a, b) {
-  return Math.round((new Date(b) - new Date(a)) / 86400000);
-}
-function toX(dateStr) {
-  const d = Math.max(0, daysBetween(RANGE_START, dateStr));
-  return Math.min(100, (d / TOTAL_DAYS) * 100);
-}
-function toW(start, end) {
-  return Math.max(0.5, toX(end) - toX(start));
-}
+let tasks=[], filt='', coll={};
 
-// ── 狀態設定 ──────────────────────────────────────────────────────
-const STATUS = {
-  '完成':   {bar:'#7a9e8e', dot:'#7a9e8e', text:'#4e7566'},
-  '執行中': {bar:'#b07d62', dot:'#b07d62', text:'#b07d62'},
-  '待辦':   {bar:'#a89f96', dot:'#a89f96', text:'#a89f96'},
-  '逾期':   {bar:'#b05c5c', dot:'#b05c5c', text:'#b05c5c'},
-};
+function toX(d){return Math.min(100,Math.max(0,(new Date(d)-new Date(RS))/86400000/TD*100));}
+function toW(s,e){return Math.max(.5,toX(e)-toX(s));}
 
-// 類別色條
-const CAT_COLOR = {
-  '行政作業': '#7a9e8e',
-  '區域輔導': '#b07d62',
-  '特色亮點': '#c49a3c',
-  '行銷整合': '#4e7566',
-  '市集活動': '#b07d62',
-  '成果展':   '#7a9e8e',
-  '報告繳交': '#b05c5c',
-};
-
-// ── 資料 ─────────────────────────────────────────────────────────
-let allTasks = [];
-let currentFilter = '全部';
-let collapsed = {};
-
-// ── 自動逾期檢查 ──────────────────────────────────────────────────
-function checkOverdue(tasks) {
-  return tasks.filter(t =>
-    t.status !== '完成' && t.endDate < TODAY
-  ).map(t => { t.status = '逾期'; return t; });
-}
-
-// ── 從 Google Sheets 讀取────────────────────────────────────────
-async function fetchSheets() {
-  setSyncStatus('loading', '同步中…');
-  try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/tq?tqx=out:json&tq=select%20*&gid=0`;
-    const res = await fetch(url);
-    const text = await res.text();
-    const match = text.match(/setResponse\((\{[\s\S]*\})\)/);
-    if (!match) throw new Error('無法解析資料');
-    const json = JSON.parse(match[1]);
-    const rows = json.table.rows;
-
-    console.log('總筆數:', rows.length);
-    console.log('第一筆:', JSON.stringify(rows[0]));
-
-    allTasks = rows.map((row, i) => {
-      const cells = row.c;
-      const getName = () => {
-        const c = cells[0];
-        if (!c) return '';
-        return String(c.f || c.v || '').trim();
-      };
-      const getStr = (idx) => {
-        const c = cells[idx];
-        if (!c) return '';
-        return String(c.f || c.v || '').trim();
-      };
-      const getDate = (idx) => {
-        const c = cells[idx];
-        if (!c || c.v === null) return '';
-        const v = c.v;
-        const f = c.f;
-        if (f) return normalizeDate(f);
-        if (typeof v === 'string') {
-          if (v.startsWith('Date(')) {
-            const p = v.replace('Date(','').replace(')','').split(',');
-            return `${p[0]}-${String(+p[1]+1).padStart(2,'0')}-${String(+p[2]).padStart(2,'0')}`;
-          }
-          return normalizeDate(v);
-        }
-        return '';
-      };
-
-      return {
-        id:        i,
-        name:      getName(),
-        category:  getStr(1),
-        startDate: getDate(2),
-        endDate:   getDate(3),
-        status:    getStr(4) || '待辦',
-        person:    getStr(5),
-        note:      getStr(6),
-      };
-    }).filter(t => t.name && t.startDate && t.endDate);
-
-    console.log('有效筆數:', allTasks.length);
-
-    allTasks.forEach(t => {
-      if (t.status !== '完成' && t.endDate < TODAY) t.status = '逾期';
-    });
-
-    setSyncStatus('ok', `已同步 ${new Date().toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit'})}`);
-    render();
-  } catch(e) {
-    setSyncStatus('error', '同步失敗：' + e.message);
-    console.error('錯誤:', e);
+function parseGDate(v){
+  if(!v) return '';
+  if(typeof v==='string'&&v.startsWith('Date(')){
+    const p=v.replace('Date(','').replace(')','').split(',');
+    return p[0]+'-'+String(+p[1]+1).padStart(2,'0')+'-'+String(+p[2]).padStart(2,'0');
   }
-}
-
-function extractDate(cell) {
-  if (!cell) return '';
-  const v = cell.v;
-  const f = cell.f;
-  if (f && typeof f === 'string') {
-    const clean = f.trim();
-    if (clean.match(/^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}$/)) {
-      return normalizeDate(clean);
-    }
-  }
-  if (typeof v === 'string' && v.startsWith('Date(')) {
-    const parts = v.replace('Date(','').replace(')','').split(',');
-    const y = parts[0], m = String(+parts[1]+1).padStart(2,'0'), d = String(+parts[2]).padStart(2,'0');
-    return `${y}-${m}-${d}`;
-  }
-  if (typeof v === 'string') return normalizeDate(v);
   return '';
 }
 
-function normalizeDate(s) {
-  if (!s) return '';
-  s = s.trim().replace(/"/g, '');
-  if (s.match(/^\d{4}-\d{2}-\d{2}$/)) return s;
-  if (s.match(/^\d{4}\/\d{1,2}\/\d{1,2}$/)) {
-    const [y, m, d] = s.split('/');
-    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+async function load(){
+  setSt('loading','同步中…');
+  try{
+    const url=`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:json&tq=select+A,B,C,D,E,F,G&gid=0`;
+    const r=await fetch(url);
+    const t=await r.text();
+    const m=t.match(/setResponse\((\{[\s\S]*\})\)/);
+    if(!m) throw new Error('解析失敗');
+    const j=JSON.parse(m[1]);
+    tasks=j.table.rows.map((row,i)=>{
+      const c=row.c;
+      const g=idx=>c[idx]?String(c[idx].f||c[idx].v||'').trim():'';
+      const gd=idx=>c[idx]?parseGDate(String(c[idx].v||'')):'';
+      return{id:i,name:g(0),cat:g(1),s:gd(2),e:gd(3),st:g(4)||'待辦',p:g(5),n:g(6)};
+    }).filter(t=>t.name&&t.s&&t.e);
+    tasks.forEach(t=>{if(t.st!=='完成'&&t.e<TODAY)t.st='逾期';});
+    setSt('ok','已同步 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
+    render();
+  }catch(e){
+    setSt('error','同步失敗');
+    console.error(e);
   }
-  return s;
 }
 
-function formatDate(v) {
-  if (!v) return '';
-  if (typeof v === 'string' && v.match(/^\d{4}-\d{2}-\d{2}$/)) return v;
-  if (typeof v === 'string' && v.startsWith('Date(')) {
-    const parts = v.replace('Date(','').replace(')','').split(',');
-    const y = parts[0], m = String(+parts[1]+1).padStart(2,'0'), d = String(+parts[2]).padStart(2,'0');
-    return `${y}-${m}-${d}`;
-  }
-  if (typeof v === 'object' && v !== null) {
-    try {
-      const s = JSON.stringify(v);
-      const m = s.match(/Date\((\d+),(\d+),(\d+)/);
-      if (m) {
-        const y = m[1], mo = String(+m[2]+1).padStart(2,'0'), d = String(+m[3]).padStart(2,'0');
-        return `${y}-${mo}-${d}`;
-      }
-    } catch(e){}
-  }
-  if (typeof v === 'string' && v.includes('/')) {
-    const parts = v.split('/');
-    if (parts.length === 3) {
-      return `${parts[2]}-${parts[0].padStart(2,'0')}-${parts[1].padStart(2,'0')}`;
-    }
-  }
-  return String(v);
+function setSt(type,txt){
+  document.getElementById('sd').className='sdot'+(type==='loading'?' loading':type==='error'?' error':'');
+  document.getElementById('st').textContent=txt;
 }
 
-function setSyncStatus(type, text) {
-  const dot = document.getElementById('sync-dot');
-  const txt = document.getElementById('sync-text');
-  dot.className = 'sync-dot' + (type === 'loading' ? ' loading' : type === 'error' ? ' error' : '');
-  txt.textContent = text;
-}
+function setF(f){filt=f;render();}
 
-// ── 篩選 ─────────────────────────────────────────────────────────
-function setFilter(f) {
-  currentFilter = f;
-  render();
-}
+function render(){
+  document.getElementById('today-lbl').textContent=TODAY;
+  const done=tasks.filter(t=>t.st==='完成').length;
+  const act=tasks.filter(t=>t.st==='執行中').length;
+  const pend=tasks.filter(t=>t.st==='待辦').length;
+  const over=tasks.filter(t=>t.st==='逾期').length;
+  document.getElementById('c-all').textContent=tasks.length;
+  document.getElementById('c-done').textContent=done;
+  document.getElementById('c-act').textContent=act;
+  document.getElementById('c-pend').textContent=pend;
+  document.getElementById('c-over').textContent=over;
 
-// ── 渲染 ─────────────────────────────────────────────────────────
-function render() {
-  const todayX = toX(TODAY);
-  document.getElementById('today-label').textContent = TODAY;
+  const al=document.getElementById('alert');
+  if(over>0){
+    al.textContent='⚠️ 逾期項目：'+tasks.filter(t=>t.st==='逾期').map(t=>t.name).join('、');
+    al.style.display='block';
+  } else al.style.display='none';
 
-  // Stats
-  const done    = allTasks.filter(t => t.status === '完成').length;
-  const active  = allTasks.filter(t => t.status === '執行中').length;
-  const pending = allTasks.filter(t => t.status === '待辦').length;
-  const overdue = allTasks.filter(t => t.status === '逾期').length;
-  document.getElementById('count-all').textContent     = allTasks.length;
-  document.getElementById('count-done').textContent    = done;
-  document.getElementById('count-active').textContent  = active;
-  document.getElementById('count-pending').textContent = pending;
-  document.getElementById('count-overdue').textContent = overdue;
+  const shown=filt?tasks.filter(t=>t.st===filt):tasks;
+  const catMap={};
+  shown.forEach(t=>{if(!catMap[t.cat])catMap[t.cat]=[];catMap[t.cat].push(t);});
+  const todayX=toX(TODAY);
+  const curM=TODAY.slice(0,7);
 
-  // Overdue alert
-  const alertBar = document.getElementById('alert-bar');
-  if (overdue > 0) {
-    const names = allTasks.filter(t=>t.status==='逾期').map(t=>t.name).join('、');
-    document.getElementById('alert-text').textContent = `${overdue} 個項目已逾期：${names}`;
-    alertBar.classList.remove('hidden');
-  } else {
-    alertBar.classList.add('hidden');
-  }
-
-  // Filter
-  const filtered = currentFilter === '全部' ? allTasks : allTasks.filter(t => t.status === currentFilter);
-
-  // Group by category
-  const catMap = {};
-  filtered.forEach(t => {
-    if (!catMap[t.category]) catMap[t.category] = [];
-    catMap[t.category].push(t);
+  let html='<div class="g-header"><div class="col-n">工作項目</div><div class="col-p">負責人</div><div class="months">';
+  MONTHS.forEach(m=>{
+    const isc=m.d.slice(0,7)===curM;
+    html+=`<div class="month${isc?' cur':''}">${m.l}</div>`;
   });
-  const cats = Object.keys(catMap);
+  html+='</div></div>';
 
-  let html = '';
-
-  // Month header
-  const curMonth = TODAY.slice(0,7);
-  html += `<div class="gantt-header">
-    <div class="col-name">工作項目</div>
-    <div class="col-person">負責人</div>
-    <div class="months-wrap">
-      ${MONTHS.map(m => {
-        const isCur = m.date.startsWith(curMonth.slice(0,4)) && m.date.slice(5,7) === curMonth.slice(5,7);
-        return `<div class="month-cell${isCur?' current':''}">${m.label}</div>`;
-      }).join('')}
-    </div>
-  </div>`;
-
-  if (cats.length === 0) {
-    html += `<div class="empty">沒有符合條件的項目</div>`;
+  if(!Object.keys(catMap).length){
+    html+='<div class="loading-wrap">沒有符合條件的項目</div>';
   } else {
-    cats.forEach(cat => {
-      const items = catMap[cat];
-      const color = CAT_COLOR[cat] || '#7a9e8e';
-      const isCollapsed = collapsed[cat];
-      const bgColor = color + '18';
-      const textColor = color + 'dd';
-
-      html += `<div class="cat-header" onclick="toggleCat('${cat}')">
+    Object.keys(catMap).forEach(cat=>{
+      const items=catMap[cat];
+      const cc=CAT_C[cat]||'#7a9e8e';
+      const isc=coll[cat];
+      html+=`<div class="cat-row" onclick="toggleCat('${cat}')">
         <div class="cat-label">
-          <div class="cat-bar" style="background:${color}"></div>
+          <div class="cat-bar" style="background:${cc}"></div>
           <span>${cat}</span>
-          <span class="cat-count" style="background:${bgColor};color:${textColor}">${items.length}</span>
-          <span class="cat-toggle">${isCollapsed ? '▶' : '▼'}</span>
+          <span class="cat-badge" style="background:${cc}22;color:${cc}">${items.length}</span>
+          <span class="cat-arrow">${isc?'▶':'▼'}</span>
         </div>
-        <div class="cat-person-spacer"></div>
-        <div class="cat-bar-spacer"></div>
+        <div class="cat-spacer"></div>
       </div>`;
-
-      if (!isCollapsed) {
-        items.forEach((task, idx) => {
-          const cfg = STATUS[task.status] || STATUS['待辦'];
-          const left = toX(task.startDate);
-          const width = toW(task.startDate, task.endDate);
-          const isDone = task.status === '完成';
-          const barColor = CAT_COLOR[task.category] || cfg.bar;
-          const finalBarColor = task.status === '逾期' ? STATUS['逾期'].bar :
-                                task.status === '完成' ? STATUS['完成'].bar : barColor;
-
-          html += `<div class="task-row" onmouseenter="showTip(event,${task.id})" onmouseleave="hideTip()">
-            <div class="task-name-col">
-              <div class="task-name">${task.name}</div>
-              <div class="task-status">
-                <div class="status-dot" style="background:${cfg.dot}"></div>
-                <span class="status-text" style="color:${cfg.text}">${task.status}</span>
-              </div>
+      if(!isc){
+        items.forEach((t,idx)=>{
+          const sc=ST_C[t.st]||'#a89f96';
+          const bc=sc;
+          const lx=toX(t.s), ww=toW(t.s,t.e);
+          const bg=idx%2===0?'var(--card)':'var(--bg)';
+          html+=`<div class="task-row" style="background:${bg}" onmouseenter="showTip(event,${t.id})" onmouseleave="hideTip()">
+            <div class="col-n" style="display:flex;flex-direction:column;justify-content:center">
+              <div class="task-name">${t.name}</div>
+              <div class="task-st"><div class="sdot2" style="background:${sc}"></div><span class="st-text" style="color:${sc}">${t.st}</span></div>
             </div>
-            <div class="task-person-col">
-              <div class="person-name">${task.person || '—'}</div>
+            <div class="col-p" style="display:flex;align-items:center">
+              <div class="person">${t.p||'—'}</div>
             </div>
             <div class="bar-area">
-              ${MONTHS.map((m,i) => {
-                const isCur = m.date.startsWith(curMonth.slice(0,4)) && m.date.slice(5,7) === curMonth.slice(5,7);
-                return `<div class="month-grid${isCur?' current':''}" style="left:${(i/MONTHS.length)*100}%;${isCur?`width:${100/MONTHS.length}%;opacity:0.15`:''}"></div>`;
+              ${MONTHS.map((m,i)=>{
+                const isc2=m.d.slice(0,7)===curM;
+                return `<div class="mgrid${isc2?' cur':''}" style="left:${(i/MONTHS.length)*100}%;${isc2?'width:'+(100/MONTHS.length)+'%':''}"></div>`;
               }).join('')}
-              ${todayX > 0 && todayX < 100 ? `<div class="today-line" style="left:${todayX}%"></div>` : ''}
-              <div class="gantt-bar${isDone?' done':''}" style="left:${left}%;width:${width}%;background:${finalBarColor};box-shadow:0 1px 4px ${finalBarColor}44">
-                ${width > 6 ? `<span class="bar-label">${task.startDate.slice(5,7)}/${task.startDate.slice(8)}→${task.endDate.slice(5,7)}/${task.endDate.slice(8)}</span>` : ''}
+              ${todayX>0&&todayX<100?`<div class="tday" style="left:${todayX}%"></div>`:''}
+              <div class="gbar${t.st==='完成'?' done':''}" style="left:${lx}%;width:${ww}%;background:${bc};box-shadow:0 1px 4px ${bc}44">
+                ${ww>6?`<span class="blabel">${t.s.slice(5,7)}/${t.s.slice(8)}→${t.e.slice(5,7)}/${t.e.slice(8)}</span>`:''}
               </div>
             </div>
           </div>`;
@@ -507,48 +277,35 @@ function render() {
     });
   }
 
-  document.getElementById('gantt-wrap').innerHTML = html;
+  document.getElementById('gantt').innerHTML=html;
 }
 
-function toggleCat(cat) {
-  collapsed[cat] = !collapsed[cat];
-  render();
-}
+function toggleCat(c){coll[c]=!coll[c];render();}
 
-// ── Tooltip ───────────────────────────────────────────────────────
-function showTip(e, id) {
-  const task = allTasks.find(t => t.id === id);
-  if (!task) return;
-  const cfg = STATUS[task.status] || STATUS['待辦'];
-  const tip = document.getElementById('tooltip');
-  tip.innerHTML = `
-    <div class="tooltip-title">${task.name}</div>
-    <div class="tooltip-row">狀態：<span style="color:${cfg.dot};font-weight:700">${task.status}</span></div>
-    <div class="tooltip-row">期間：${task.startDate} → ${task.endDate}</div>
-    <div class="tooltip-row">類別：${task.category}</div>
-    ${task.person ? `<div class="tooltip-row">負責人：${task.person}</div>` : ''}
-    ${task.note ? `<div class="tooltip-note">💬 ${task.note}</div>` : ''}
-  `;
-  tip.style.display = 'block';
+function showTip(e,id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t)return;
+  const sc=ST_C[t.st]||'#a89f96';
+  const tip=document.getElementById('tip');
+  tip.innerHTML=`<div class="tip-title">${t.name}</div>
+    <div>狀態：<span style="color:${sc};font-weight:700">${t.st}</span></div>
+    <div>期間：${t.s} → ${t.e}</div>
+    <div>類別：${t.cat}</div>
+    ${t.p?`<div>負責人：${t.p}</div>`:''}
+    ${t.n?`<div style="margin-top:6px;padding-top:6px;border-top:1px solid #fff2;color:var(--amber)">💬 ${t.n}</div>`:''}`;
+  tip.style.display='block';
   moveTip(e);
 }
-function moveTip(e) {
-  const tip = document.getElementById('tooltip');
-  const x = Math.min(e.clientX + 14, window.innerWidth - 260);
-  const y = Math.min(e.clientY - 10, window.innerHeight - 200);
-  tip.style.left = x + 'px';
-  tip.style.top = y + 'px';
+function moveTip(e){
+  const tip=document.getElementById('tip');
+  tip.style.left=Math.min(e.clientX+12,window.innerWidth-245)+'px';
+  tip.style.top=Math.min(e.clientY-10,window.innerHeight-200)+'px';
 }
-function hideTip() {
-  document.getElementById('tooltip').style.display = 'none';
-}
-document.addEventListener('mousemove', e => {
-  if (document.getElementById('tooltip').style.display !== 'none') moveTip(e);
-});
+function hideTip(){document.getElementById('tip').style.display='none';}
+document.addEventListener('mousemove',e=>{if(document.getElementById('tip').style.display!=='none')moveTip(e);});
 
-// ── 初始化 ────────────────────────────────────────────────────────
-fetchSheets();
-setInterval(fetchSheets, SYNC_INTERVAL);
+load();
+setInterval(load, 5*60*1000);
 </script>
 </body>
 </html>
