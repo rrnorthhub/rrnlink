@@ -258,26 +258,35 @@ function checkOverdue(tasks) {
   ).map(t => { t.status = '逾期'; return t; });
 }
 
-// ── 從 Google Sheets 讀取（CSV格式，最穩定）─────────────────────
+// ── 從 Google Sheets 讀取（gviz API）────────────────────────────
 async function fetchSheets() {
   setSyncStatus('loading', '同步中…');
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/export?format=csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}&headers=1`;
     const res = await fetch(url);
     const text = await res.text();
-    const lines = text.trim().split('\n');
-    
-    allTasks = lines.slice(1).map((line, i) => {
-      const cols = parseCSVLine(line);
+    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1]);
+    const rows = json.table.rows;
+
+    allTasks = rows.map((row, i) => {
+      const cells = row.c;
+      const get = (idx) => {
+        const cell = cells[idx];
+        if (!cell) return '';
+        return cell.f || cell.v || '';
+      };
+      const name = String(get(0)).trim();
+      const startRaw = cells[2];
+      const endRaw = cells[3];
       return {
         id:        i,
-        name:      (cols[0] || '').trim(),
-        category:  (cols[1] || '').trim(),
-        startDate: normalizeDate(cols[2]),
-        endDate:   normalizeDate(cols[3]),
-        status:    (cols[4] || '待辦').trim(),
-        person:    (cols[5] || '').trim(),
-        note:      (cols[6] || '').trim(),
+        name:      name,
+        category:  String(get(1)).trim(),
+        startDate: extractDate(startRaw),
+        endDate:   extractDate(endRaw),
+        status:    String(get(4) || '待辦').trim(),
+        person:    String(get(5) || '').trim(),
+        note:      String(get(6) || '').trim(),
       };
     }).filter(t => t.name && t.name !== '工項名稱' && t.startDate && t.endDate);
 
@@ -288,9 +297,28 @@ async function fetchSheets() {
     setSyncStatus('ok', `已同步 ${new Date().toLocaleTimeString('zh-TW', {hour:'2-digit',minute:'2-digit'})}`);
     render();
   } catch(e) {
-    setSyncStatus('error', '同步失敗，請檢查權限');
+    setSyncStatus('error', '同步失敗');
     console.error(e);
   }
+}
+
+function extractDate(cell) {
+  if (!cell) return '';
+  const v = cell.v;
+  const f = cell.f;
+  if (f && typeof f === 'string') {
+    const clean = f.trim();
+    if (clean.match(/^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}$/)) {
+      return normalizeDate(clean);
+    }
+  }
+  if (typeof v === 'string' && v.startsWith('Date(')) {
+    const parts = v.replace('Date(','').replace(')','').split(',');
+    const y = parts[0], m = String(+parts[1]+1).padStart(2,'0'), d = String(+parts[2]).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  }
+  if (typeof v === 'string') return normalizeDate(v);
+  return '';
 }
 
 function normalizeDate(s) {
