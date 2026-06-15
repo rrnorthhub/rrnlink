@@ -273,7 +273,7 @@ async function fetchSheets() {
       const get = (idx) => cells[idx]?.v ?? '';
       return {
         id:        i,
-        name:      get(0),
+        name:      String(get(0)).trim(),
         category:  get(1),
         startDate: get(2) ? formatDate(get(2)) : '',
         endDate:   get(3) ? formatDate(get(3)) : '',
@@ -281,7 +281,7 @@ async function fetchSheets() {
         person:    get(5),
         note:      get(6),
       };
-    }).filter(t => t.name && t.startDate && t.endDate);
+    }).filter(t => t.name && t.name !== '工項名稱' && t.startDate && t.endDate);
 
     // 自動標記逾期
     allTasks.forEach(t => {
