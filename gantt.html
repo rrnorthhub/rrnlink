@@ -63,11 +63,12 @@
 
     /* Category group */
     .cat-header{display:flex;align-items:center;background:var(--dim);border-bottom:1px solid var(--line);border-top:1px solid var(--line);cursor:pointer;user-select:none}
-    .cat-label{width:340px;flex-shrink:0;padding:7px 16px;border-right:1px solid var(--line);display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--ink);overflow:visible;white-space:nowrap}
+    .cat-label{width:240px;flex-shrink:0;padding:7px 16px;border-right:1px solid var(--line);display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--ink);white-space:nowrap}
     .cat-bar{width:3px;height:16px;border-radius:2px;flex-shrink:0}
-    .cat-count{font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-left:auto}
-    .cat-toggle{font-size:11px;color:var(--muted);margin-left:4px}
-    .cat-spacer{flex:1}
+    .cat-count{font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px}
+    .cat-toggle{font-size:11px;color:var(--muted);margin-left:6px}
+    .cat-person-spacer{width:100px;flex-shrink:0;border-right:1px solid var(--line)}
+    .cat-bar-spacer{flex:1}
 
     /* Task rows */
     .task-row{display:flex;align-items:stretch;border-bottom:1px solid var(--line)}
@@ -383,11 +384,12 @@ function render() {
       html += `<div class="cat-header" onclick="toggleCat('${cat}')">
         <div class="cat-label">
           <div class="cat-bar" style="background:${color}"></div>
-          ${cat}
+          <span>${cat}</span>
           <span class="cat-count" style="background:${bgColor};color:${textColor}">${items.length}</span>
           <span class="cat-toggle">${isCollapsed ? '▶' : '▼'}</span>
         </div>
-        <div class="cat-spacer"></div>
+        <div class="cat-person-spacer"></div>
+        <div class="cat-bar-spacer"></div>
       </div>`;
 
       if (!isCollapsed) {
