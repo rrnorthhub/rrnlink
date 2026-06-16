@@ -8,7 +8,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f7f5f2;--card:#fdfcfa;--dim:#f0ede8;--line:#e8e3dd;
+  --bg:#f7f5f2;--card:#fdfcfa;--dim:#f0ede8;--line:#e8e3dd;--hair:#d8d2cb;
   --sage:#7a9e8e;--sage-lt:#eef3f0;--sage-dk:#4e7566;
   --clay:#b07d62;--clay-lt:#f5ede7;
   --amber:#c49a3c;--amber-lt:#faf3e0;
@@ -16,86 +16,109 @@
   --ink:#2c2c2c;--sub:#6b6560;--muted:#a89f96;
 }
 body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
-.header{background:var(--card);border-bottom:1px solid var(--line);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
-.logo{width:30px;height:30px;border-radius:8px;background:var(--sage);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;margin-right:10px}
+
+/* Header */
+.header{background:var(--card);border-bottom:1px solid var(--line);padding:0 16px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--sage);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;margin-right:10px;flex-shrink:0}
 .h-title{font-size:14px;font-weight:800;color:var(--ink)}
 .h-sub{font-size:10px;color:var(--muted)}
 .sync{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
-.sdot{width:7px;height:7px;border-radius:50%;background:var(--sage)}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--sage);flex-shrink:0}
 .sdot.loading{background:var(--amber);animation:pulse 1s infinite}
 .sdot.error{background:var(--red)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.btn-back{padding:5px 12px;border:1px solid var(--line);border-radius:8px;background:transparent;font-size:12px;color:var(--sub);cursor:pointer;text-decoration:none}
-.stats{padding:12px 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line);background:var(--card)}
-.pill{display:flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;cursor:pointer;border:1px solid transparent;font-size:12px}
+.btn-back{padding:5px 12px;border:1px solid var(--line);border-radius:8px;background:transparent;font-size:12px;color:var(--sub);cursor:pointer;text-decoration:none;white-space:nowrap}
+
+/* Stats */
+.stats{padding:10px 16px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;border-bottom:1px solid var(--line);background:var(--card)}
+.pill{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;cursor:pointer;border:1px solid transparent;font-size:11px}
 .today-info{margin-left:auto;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px}
 .tline-icon{width:2px;height:14px;background:var(--red);border-radius:1px;opacity:.7}
-.wrap{max-width:1400px;margin:0 auto;padding:16px 20px 48px}
+
+/* Alert */
+.alert{background:var(--amber-lt);border-bottom:1px solid #f0c060;padding:10px 16px;font-size:12px;color:var(--ink);display:none;line-height:1.8}
+
+/* Wrap */
+.wrap{max-width:1400px;margin:0 auto;padding:16px 16px 48px}
+
+/* Gantt 外層 */
 .gantt{background:var(--card);border-radius:12px;border:1px solid var(--line);overflow:hidden}
-/* 固定欄位寬度 */
-.col-n{width:220px;min-width:220px;max-width:220px;flex-shrink:0;padding:12px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;min-height:65px}
-.col-p{width:110px;min-width:110px;max-width:110px;flex-shrink:0;padding:12px 8px;border-right:1px solid var(--line);display:flex;align-items:center;min-height:65px}
-.col-b{flex:1;position:relative}
-/* Header row */
-.g-header{display:flex;background:var(--dim);border-bottom:2px solid var(--line);position:sticky;top:52px;z-index:10}
-.g-header .col-n{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;display:flex;align-items:center;min-height:75px}
-.g-header .col-p{font-size:11px;font-weight:700;color:var(--muted);display:flex;align-items:center;min-height:75px}
-.months{flex:1;display:flex}
-.month{flex:1;text-align:center;padding:10px 0;font-size:10px;font-weight:600;color:var(--muted);border-right:1px solid var(--line)}
+
+/* 每一列結構：左固定 + 右可捲動 */
+.g-row{display:flex;align-items:stretch;border-bottom:1px solid var(--line)}
+.g-row:last-child{border-bottom:none}
+
+/* 左側固定欄（工作項目）*/
+.fixed{width:180px;min-width:180px;flex-shrink:0;position:sticky;left:0;z-index:10;background:inherit;border-right:1px solid var(--line)}
+
+/* 右側可捲動區（月份+色條）*/
+.scrollable{flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.scrollable::-webkit-scrollbar{height:3px}
+.scrollable::-webkit-scrollbar-thumb{background:var(--hair);border-radius:2px}
+
+/* 月份列 */
+.months-row{display:flex;min-width:800px;height:100%}
+.month{width:75px;flex-shrink:0;text-align:center;padding:10px 0;font-size:10px;font-weight:600;color:var(--muted);border-right:1px solid var(--line)}
 .month:last-child{border-right:none}
 .month.cur{background:var(--sage-lt);color:var(--sage-dk);font-weight:800}
-/* Cat header */
-.cat-row{display:flex;align-items:center;background:var(--dim);border-bottom:1px solid var(--line);border-top:1px solid var(--line);cursor:pointer;user-select:none;min-height:40px}
-.cat-label{flex-shrink:0;padding:8px 14px;border-right:1px solid var(--line);display:flex;align-items:center;gap:6px;font-size:13px;font-weight:800;color:var(--ink);white-space:nowrap;min-width:330px}
-.cat-bar{width:3px;height:14px;border-radius:2px;flex-shrink:0}
-.cat-badge{font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px}
+
+/* Header 列 */
+.g-header{display:flex;align-items:stretch;background:var(--dim);border-bottom:2px solid var(--line);position:sticky;top:52px;z-index:100}
+.g-header .fixed{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;display:flex;align-items:center;padding:0 14px;min-height:50px;background:var(--dim)}
+.g-header .scrollable{background:var(--dim)}
+
+/* 類別標題列 */
+.cat-row{display:flex;align-items:stretch;background:var(--dim);border-bottom:1px solid var(--line);border-top:1px solid var(--line);cursor:pointer;user-select:none}
+.cat-fixed{width:180px;min-width:180px;flex-shrink:0;position:sticky;left:0;z-index:10;background:var(--dim);border-right:1px solid var(--line);display:flex;align-items:center;padding:8px 12px;gap:6px}
+.cat-bar-line{width:3px;height:14px;border-radius:2px;flex-shrink:0}
+.cat-name{font-size:12px;font-weight:800;color:var(--ink);white-space:nowrap}
+.cat-badge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:2px}
 .cat-arrow{font-size:11px;color:var(--muted);margin-left:auto}
-.cat-spacer{flex:1}
-/* Task row */
-.task-row{display:flex;align-items:stretch;border-bottom:1px solid var(--line)}
-.task-row:last-child{border-bottom:none}
-.task-row:nth-child(odd){background:var(--card)}
-.task-row:nth-child(even){background:var(--bg)}
-.task-name{font-size:12px;font-weight:600;color:var(--ink);line-height:1.6;word-break:keep-all;white-space:normal}
+.cat-scroll{flex:1;min-width:800px;background:var(--dim)}
+
+/* 工作項目列 */
+.task-fixed{display:flex;flex-direction:column;justify-content:center;padding:12px 12px;min-height:65px}
+.task-name{font-size:12px;font-weight:600;color:var(--ink);line-height:1.5;word-break:keep-all}
 .task-st{display:flex;align-items:center;gap:4px;margin-top:4px}
 .sdot2{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .st-text{font-size:10px}
-.person{font-size:10px;color:var(--muted);line-height:1.5;word-break:keep-all;white-space:normal}
-/* Bar area */
-.bar-area{flex:1;position:relative;min-height:65px;cursor:pointer}
-.bar-area:hover{background:rgba(122,158,142,.04)}
-.mgrid{position:absolute;top:0;bottom:0;width:1px;background:var(--line);pointer-events:none}
-.mgrid.cur{width:100%;background:rgba(122,158,142,.08)}
+
+/* 色條區 */
+.bar-wrap{min-width:800px;position:relative;min-height:65px}
+.mgrid{position:absolute;top:0;bottom:0;width:75px;border-right:1px solid var(--line);pointer-events:none}
+.mgrid.cur{background:rgba(122,158,142,.08)}
 .tday{position:absolute;top:0;bottom:0;width:2px;background:var(--red);opacity:.6;pointer-events:none;z-index:3}
-.gbar{position:absolute;top:50%;transform:translateY(-50%);height:20px;border-radius:5px;min-width:4px;z-index:2;display:flex;align-items:center;overflow:hidden}
+.gbar{position:absolute;top:50%;transform:translateY(-50%);height:22px;border-radius:5px;min-width:4px;z-index:2;display:flex;align-items:center;overflow:hidden}
 .gbar.done{background-image:repeating-linear-gradient(45deg,transparent,transparent 3px,rgba(255,255,255,.3) 3px,rgba(255,255,255,.3) 6px)}
-.blabel{font-size:9px;font-weight:700;color:#fff;padding-left:6px;white-space:nowrap;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+.blabel{font-size:9px;font-weight:700;color:#fff;padding-left:7px;white-space:nowrap;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,.25)}
+
 /* Tooltip */
 .tip{position:fixed;background:var(--ink);color:#f8fafc;border-radius:10px;padding:12px 14px;width:230px;z-index:9999;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.3);font-size:11px;line-height:1.6;display:none}
 .tip-title{font-weight:700;font-size:13px;margin-bottom:6px}
+
 /* Legend */
-.legend{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--sub)}
+.legend{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--sub)}
 .li{display:flex;align-items:center;gap:4px}
+
 /* Loading */
 .loading-wrap{padding:60px 0;text-align:center;color:var(--muted);font-size:13px}
 .spinner{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--sage);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.alert{background:var(--amber-lt);border-bottom:1px solid #f0c060;padding:10px 20px;font-size:12px;color:var(--ink);display:none;line-height:1.8}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div style="display:flex;align-items:center">
+  <div style="display:flex;align-items:center;min-width:0;flex:1">
     <div class="logo">北</div>
-    <div>
+    <div style="min-width:0">
       <div class="h-title">北輔中心計畫期程甘特圖</div>
       <div class="h-sub">115年度地方創生北區輔導中心</div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:12px">
+  <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:12px">
     <div class="sync"><div class="sdot" id="sd"></div><span id="st">載入中…</span></div>
-    <a href="/" class="btn-back">← 返回入口</a>
+    <a href="/" class="btn-back">← 返回</a>
   </div>
 </div>
 
@@ -117,13 +140,13 @@ body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:
     <div style="width:7px;height:7px;border-radius:50%;background:var(--muted)"></div>
     <span style="color:var(--muted)">待辦</span><span id="c-pend" style="font-weight:900;color:var(--muted)">0</span>
   </div>
-  <div class="pill" onclick="setF('逾期')" style="background:var(--red-lt);border-color:var(--red)">
-    <div style="width:7px;height:7px;border-radius:50%;background:var(--red)"></div>
-    <span style="color:var(--red)">逾期</span><span id="c-over" style="font-weight:900;color:var(--red)">0</span>
-  </div>
   <div class="pill" onclick="setF('即將到期')" style="background:var(--amber-lt);border-color:var(--amber)">
     <div style="width:7px;height:7px;border-radius:50%;background:var(--amber)"></div>
     <span style="color:var(--amber)">即將到期</span><span id="c-warn" style="font-weight:900;color:var(--amber)">0</span>
+  </div>
+  <div class="pill" onclick="setF('逾期')" style="background:var(--red-lt);border-color:var(--red)">
+    <div style="width:7px;height:7px;border-radius:50%;background:var(--red)"></div>
+    <span style="color:var(--red)">逾期</span><span id="c-over" style="font-weight:900;color:var(--red)">0</span>
   </div>
   <div class="today-info"><div class="tline-icon"></div>今日 <span id="today-lbl"></span></div>
 </div>
@@ -137,42 +160,45 @@ body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:
     <div class="li"><div style="width:2px;height:14px;background:var(--red);border-radius:1px;opacity:.7"></div>今日</div>
     <div class="li"><div style="width:22px;height:10px;border-radius:3px;background-image:repeating-linear-gradient(45deg,var(--sage),var(--sage) 3px,var(--sage-lt) 3px,var(--sage-lt) 6px)"></div>完成</div>
     <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--clay)"></div>執行中</div>
-    <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--muted)"></div>待辦</div>
     <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--amber)"></div>即將到期</div>
     <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--red)"></div>逾期</div>
-    <span style="margin-left:auto;color:var(--muted)">每5分鐘自動同步 · 滑鼠移至色條查看詳情</span>
+    <div class="li"><div style="width:22px;height:10px;border-radius:3px;background:var(--muted)"></div>待辦</div>
+    <span style="margin-left:auto;color:var(--muted)">左右滑動查看期程 · 每5分鐘自動同步</span>
   </div>
 </div>
 
 <div class="tip" id="tip"></div>
 
 <script>
-const SID = '1OgljOYoEprfJ7qF5xKyTJ-0-BnWsAPlfevQq6Y9WC1M';
-const MONTHS = [
+const SID='1OgljOYoEprfJ7qF5xKyTJ-0-BnWsAPlfevQq6Y9WC1M';
+const MONTHS=[
   {l:'5月',d:'2026-05-01'},{l:'6月',d:'2026-06-01'},{l:'7月',d:'2026-07-01'},
   {l:'8月',d:'2026-08-01'},{l:'9月',d:'2026-09-01'},{l:'10月',d:'2026-10-01'},
   {l:'11月',d:'2026-11-01'},{l:'12月',d:'2026-12-01'},{l:'116/1',d:'2027-01-01'},
   {l:'2月',d:'2027-02-01'},{l:'3月',d:'2027-03-01'},{l:'4月',d:'2027-04-01'},
 ];
-const RS = '2026-05-01', RE = '2027-04-30';
-const TD = Math.round((new Date(RE)-new Date(RS))/86400000);
-const TODAY = new Date().toISOString().slice(0,10);
-const CAT_C = {'行政作業':'#7a9e8e','區域輔導':'#b07d62','特色亮點':'#c49a3c','行銷整合':'#4e7566','市集活動':'#b07d62','成果展':'#7a9e8e','報告繳交':'#b05c5c'};
-const ST_C = {'完成':'#7a9e8e','執行中':'#b07d62','待辦':'#a89f96','逾期':'#b05c5c','即將到期':'#c49a3c'};
+const RS='2026-05-01',RE='2027-04-30';
+const TD=Math.round((new Date(RE)-new Date(RS))/86400000);
+const TODAY=new Date().toISOString().slice(0,10);
+const MONTH_W=75; // 每個月份的寬度px
+const TOTAL_W=MONTHS.length*MONTH_W;
 
-let tasks=[], filt='', coll={};
+const CAT_C={'行政作業':'#7a9e8e','區域輔導':'#b07d62','特色亮點':'#c49a3c','行銷整合':'#4e7566','市集活動':'#b07d62','成果展':'#7a9e8e','報告繳交':'#b05c5c'};
+const ST_C={'完成':'#7a9e8e','執行中':'#b07d62','待辦':'#a89f96','逾期':'#b05c5c','即將到期':'#c49a3c'};
 
-function toX(d){return Math.min(100,Math.max(0,(new Date(d)-new Date(RS))/86400000/TD*100));}
-function toW(s,e){return Math.max(.5,toX(e)-toX(s));}
+let tasks=[],filt='',coll={};
+
+function toX(d){return Math.min(TOTAL_W,Math.max(0,(new Date(d)-new Date(RS))/86400000/TD*TOTAL_W));}
+function toW(s,e){return Math.max(4,toX(e)-toX(s));}
 function daysLeft(e){return Math.round((new Date(e)-new Date(TODAY))/86400000);}
 
 function parseGDate(v){
-  if(!v) return '';
+  if(!v)return'';
   if(typeof v==='string'&&v.startsWith('Date(')){
     const p=v.replace('Date(','').replace(')','').split(',');
     return p[0]+'-'+String(+p[1]+1).padStart(2,'0')+'-'+String(+p[2]).padStart(2,'0');
   }
-  return '';
+  return'';
 }
 
 async function load(){
@@ -182,7 +208,7 @@ async function load(){
     const r=await fetch(url);
     const t=await r.text();
     const m=t.match(/setResponse\((\{[\s\S]*\})\)/);
-    if(!m) throw new Error('解析失敗');
+    if(!m)throw new Error('解析失敗');
     const j=JSON.parse(m[1]);
     tasks=j.table.rows.map((row,i)=>{
       const c=row.c;
@@ -192,8 +218,8 @@ async function load(){
     }).filter(t=>t.name&&t.s&&t.e);
     tasks.forEach(t=>{
       if(t.st!=='完成'){
-        if(t.e<TODAY) t.st='逾期';
-        else if(daysLeft(t.e)<=14) t.st='即將到期';
+        if(t.e<TODAY)t.st='逾期';
+        else if(daysLeft(t.e)<=14)t.st='即將到期';
       }
     });
     setSt('ok','已同步 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}));
@@ -226,11 +252,10 @@ function render(){
   document.getElementById('c-warn').textContent=warn;
 
   const al=document.getElementById('alert');
-  let alertHtml='';
-  if(over>0) alertHtml+=`<div style="margin-bottom:${warn?'6px':'0'}">🔴 逾期 ${over} 項：${tasks.filter(t=>t.st==='逾期').map(t=>t.name).join('、')}</div>`;
-  if(warn>0) alertHtml+=`<div>⏰ 即將到期（14天內）${warn} 項：${tasks.filter(t=>t.st==='即將到期').map(t=>t.name+'（剩'+daysLeft(t.e)+'天）').join('、')}</div>`;
-  if(alertHtml){al.innerHTML=alertHtml;al.style.display='block';}
-  else al.style.display='none';
+  let ah='';
+  if(over>0)ah+=`<div>🔴 逾期 ${over} 項：${tasks.filter(t=>t.st==='逾期').map(t=>t.name).join('、')}</div>`;
+  if(warn>0)ah+=`<div>⏰ 即將到期（14天內）${warn} 項：${tasks.filter(t=>t.st==='即將到期').map(t=>t.name+'（剩'+daysLeft(t.e)+'天）').join('、')}</div>`;
+  if(ah){al.innerHTML=ah;al.style.display='block';}else al.style.display='none';
 
   const shown=filt?tasks.filter(t=>t.st===filt):tasks;
   const catMap={};
@@ -238,51 +263,58 @@ function render(){
   const todayX=toX(TODAY);
   const curM=TODAY.slice(0,7);
 
-  let html='<div class="g-header"><div class="col-n">工作項目</div><div class="col-p">負責人</div><div class="months">';
-  MONTHS.forEach(m=>{
+  // 月份格線 HTML（共用）
+  const gridsHtml=MONTHS.map((m,i)=>{
     const isc=m.d.slice(0,7)===curM;
-    html+=`<div class="month${isc?' cur':''}">${m.l}</div>`;
-  });
-  html+='</div></div>';
+    return`<div class="mgrid${isc?' cur':''}" style="left:${i*MONTH_W}px;${isc?'background:rgba(122,158,142,.08)':''}"></div>`;
+  }).join('');
+  const todayHtml=todayX>0&&todayX<TOTAL_W?`<div class="tday" style="left:${todayX}px"></div>`:'';
+
+  // Header
+  let html=`<div class="g-header">
+    <div class="fixed" style="background:var(--dim);font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;padding:0 14px;display:flex;align-items:center;min-height:50px">工作項目</div>
+    <div class="scrollable" id="sh" style="background:var(--dim)">
+      <div class="months-row" style="min-width:${TOTAL_W}px">
+        ${MONTHS.map(m=>{const isc=m.d.slice(0,7)===curM;return`<div class="month${isc?' cur':''}">${m.l}</div>`;}).join('')}
+      </div>
+    </div>
+  </div>`;
 
   if(!Object.keys(catMap).length){
     html+='<div class="loading-wrap">沒有符合條件的項目</div>';
-  } else {
+  }else{
     Object.keys(catMap).forEach(cat=>{
       const items=catMap[cat];
       const cc=CAT_C[cat]||'#7a9e8e';
-      const isc=coll[cat];
+      const isC=coll[cat];
       html+=`<div class="cat-row" onclick="toggleCat('${cat}')">
-        <div class="cat-label">
-          <div class="cat-bar" style="background:${cc}"></div>
-          <span>${cat}</span>
+        <div class="cat-fixed">
+          <div class="cat-bar-line" style="background:${cc}"></div>
+          <span class="cat-name">${cat}</span>
           <span class="cat-badge" style="background:${cc}22;color:${cc}">${items.length}</span>
-          <span class="cat-arrow">${isc?'▶':'▼'}</span>
+          <span class="cat-arrow">${isC?'▶':'▼'}</span>
         </div>
-        <div class="cat-spacer"></div>
+        <div class="cat-scroll" style="min-width:${TOTAL_W}px"></div>
       </div>`;
-      if(!isc){
+
+      if(!isC){
         items.forEach((t,idx)=>{
           const sc=ST_C[t.st]||'#a89f96';
-          const bc=sc;
-          const lx=toX(t.s), ww=toW(t.s,t.e);
+          const lx=toX(t.s),ww=toW(t.s,t.e);
           const bg=idx%2===0?'var(--card)':'var(--bg)';
-          html+=`<div class="task-row" style="background:${bg}" onmouseenter="showTip(event,${t.id})" onmouseleave="hideTip()">
-            <div class="col-n" style="display:flex;flex-direction:column;justify-content:center">
-              <div class="task-name">${t.name}</div>
-              <div class="task-st"><div class="sdot2" style="background:${sc}"></div><span class="st-text" style="color:${sc}">${t.st}</span></div>
+          html+=`<div class="g-row" style="background:${bg}">
+            <div class="fixed" style="background:${bg}">
+              <div class="task-fixed">
+                <div class="task-name">${t.name}</div>
+                <div class="task-st"><div class="sdot2" style="background:${sc}"></div><span class="st-text" style="color:${sc}">${t.st}</span></div>
+              </div>
             </div>
-            <div class="col-p" style="display:flex;align-items:center">
-              <div class="person">${t.p||'—'}</div>
-            </div>
-            <div class="bar-area">
-              ${MONTHS.map((m,i)=>{
-                const isc2=m.d.slice(0,7)===curM;
-                return `<div class="mgrid${isc2?' cur':''}" style="left:${(i/MONTHS.length)*100}%;${isc2?'width:'+(100/MONTHS.length)+'%':''}"></div>`;
-              }).join('')}
-              ${todayX>0&&todayX<100?`<div class="tday" style="left:${todayX}%"></div>`:''}
-              <div class="gbar${t.st==='完成'?' done':''}" style="left:${lx}%;width:${ww}%;background:${bc};box-shadow:0 1px 4px ${bc}44">
-                ${ww>6?`<span class="blabel">${t.s.slice(5,7)}/${t.s.slice(8)}→${t.e.slice(5,7)}/${t.e.slice(8)}</span>`:''}
+            <div class="scrollable ss" onmouseenter="showTip(event,${t.id})" onmouseleave="hideTip()" ontouchstart="showTip(event,${t.id})" ontouchend="hideTip()">
+              <div class="bar-wrap" style="min-width:${TOTAL_W}px">
+                ${gridsHtml}${todayHtml}
+                <div class="gbar${t.st==='完成'?' done':''}" style="left:${lx}px;width:${ww}px;background:${sc};box-shadow:0 1px 4px ${sc}44">
+                  ${ww>40?`<span class="blabel">${t.s.slice(5,7)}/${t.s.slice(8)}→${t.e.slice(5,7)}/${t.e.slice(8)}</span>`:''}
+                </div>
               </div>
             </div>
           </div>`;
@@ -292,9 +324,24 @@ function render(){
   }
 
   document.getElementById('gantt').innerHTML=html;
+  setupSync();
 }
 
 function toggleCat(c){coll[c]=!coll[c];render();}
+
+// 同步所有捲動區
+function setupSync(){
+  const all=[document.getElementById('sh'),...document.querySelectorAll('.ss')].filter(Boolean);
+  let isSyncing=false;
+  all.forEach(el=>{
+    el.addEventListener('scroll',()=>{
+      if(isSyncing)return;
+      isSyncing=true;
+      all.forEach(other=>{if(other!==el)other.scrollLeft=el.scrollLeft;});
+      requestAnimationFrame(()=>{isSyncing=false;});
+    },{passive:true});
+  });
+}
 
 function showTip(e,id){
   const t=tasks.find(x=>x.id===id);
@@ -312,14 +359,16 @@ function showTip(e,id){
 }
 function moveTip(e){
   const tip=document.getElementById('tip');
-  tip.style.left=Math.min(e.clientX+12,window.innerWidth-245)+'px';
-  tip.style.top=Math.min(e.clientY-10,window.innerHeight-200)+'px';
+  const cx=e.touches?e.touches[0].clientX:e.clientX;
+  const cy=e.touches?e.touches[0].clientY:e.clientY;
+  tip.style.left=Math.min(cx+12,window.innerWidth-245)+'px';
+  tip.style.top=Math.min(cy-10,window.innerHeight-200)+'px';
 }
 function hideTip(){document.getElementById('tip').style.display='none';}
 document.addEventListener('mousemove',e=>{if(document.getElementById('tip').style.display!=='none')moveTip(e);});
 
 load();
-setInterval(load, 5*60*1000);
+setInterval(load,5*60*1000);
 </script>
 </body>
 </html>
