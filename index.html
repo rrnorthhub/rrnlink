@@ -158,7 +158,6 @@
         <div class="form-placeholder">
           <p class="form-hint">以下為 Google Forms 報名表單嵌入區域</p>
           <div class="form-embed-box">
-            <!-- 將 Google Forms 的 iframe 嵌入碼貼在這裡 -->
             <p style="color:#a89f96;font-size:14px;text-align:center;padding:48px 0;">
               活動報名表單<br/>
               <span style="font-size:12px">（待嵌入 Google Forms）</span>
@@ -173,7 +172,6 @@
       <section class="section" id="download">
         <h2 class="section-title">文件下載</h2>
         <div class="download-grid">
-
           <div class="download-folder">
             <div class="folder-header">
               <span class="folder-icon">📁</span>
@@ -186,7 +184,6 @@
               </a>
             </div>
           </div>
-
           <div class="download-folder">
             <div class="folder-header">
               <span class="folder-icon">📁</span>
@@ -199,7 +196,6 @@
               </a>
             </div>
           </div>
-
           <div class="download-folder">
             <div class="folder-header">
               <span class="folder-icon">📋</span>
@@ -212,7 +208,6 @@
               </a>
             </div>
           </div>
-
         </div>
       </section>
 
@@ -293,15 +288,15 @@
           <div class="internal-desc">計畫時程總覽</div>
         </a>
         <a href="https://script.google.com/macros/s/AKfycbxVJ8um38au0mlNP2uFK4KF-lqGZT6tfrRAudRWYH3zEUCfXPPoXwPiw3ByLibGDGFH/exec" target="_blank" class="internal-card">
-  <div class="internal-icon">導</div>
-  <div class="internal-label">創生導航儀</div>
-  <div class="internal-desc">新增來電・AI 案件診斷</div>
-</a>
-<a href="call.html" class="internal-card">
-  <div class="internal-icon">電</div>
-  <div class="internal-label">來電紀錄</div>
-  <div class="internal-desc">查看所有來電案件清單</div>
-</a>
+          <div class="internal-icon">導</div>
+          <div class="internal-label">創生導航儀</div>
+          <div class="internal-desc">新增來電・AI 案件診斷</div>
+        </a>
+        <a href="call.html" class="internal-card">
+          <div class="internal-icon">電</div>
+          <div class="internal-label">來電紀錄</div>
+          <div class="internal-desc">查看所有來電案件清單</div>
+        </a>
         <div class="internal-card" onclick="alert('提案追蹤系統建置中')">
           <div class="internal-icon">提</div>
           <div class="internal-label">提案追蹤</div>
@@ -350,5 +345,18 @@
   </footer>
 
   <script src="app.js"></script>
+  <script>
+    // 從內部頁面返回時，自動切換到內部工作區（不需重新輸入密碼）
+    if (window.location.hash === '#internal') {
+      const wasLoggedIn = sessionStorage.getItem('nrrc_auth');
+      if (wasLoggedIn === 'true') {
+        showView('internal');
+      } else {
+        showView('login');
+      }
+      // 清掉 hash，避免重新整理時重複觸發
+      history.replaceState(null, '', window.location.pathname);
+    }
+  </script>
 </body>
 </html>

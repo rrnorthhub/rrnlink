@@ -118,7 +118,7 @@ body{font-family:'Noto Sans TC',system-ui,sans-serif;background:var(--bg);color:
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:12px">
     <div class="sync"><div class="sdot" id="sd"></div><span id="st">載入中…</span></div>
-    <a href="/" class="btn-back">← 返回</a>
+    <a href="/#internal" class="btn-back">← 返回</a>
   </div>
 </div>
 
@@ -180,7 +180,7 @@ const MONTHS=[
 const RS='2026-05-01',RE='2027-04-30';
 const TD=Math.round((new Date(RE)-new Date(RS))/86400000);
 const TODAY=new Date().toISOString().slice(0,10);
-const MONTH_W=75; // 每個月份的寬度px
+const MONTH_W=75;
 const TOTAL_W=MONTHS.length*MONTH_W;
 
 const CAT_C={'行政作業':'#7a9e8e','區域輔導':'#b07d62','特色亮點':'#c49a3c','行銷整合':'#4e7566','市集活動':'#b07d62','成果展':'#7a9e8e','報告繳交':'#b05c5c'};
@@ -263,14 +263,12 @@ function render(){
   const todayX=toX(TODAY);
   const curM=TODAY.slice(0,7);
 
-  // 月份格線 HTML（共用）
   const gridsHtml=MONTHS.map((m,i)=>{
     const isc=m.d.slice(0,7)===curM;
     return`<div class="mgrid${isc?' cur':''}" style="left:${i*MONTH_W}px;${isc?'background:rgba(122,158,142,.08)':''}"></div>`;
   }).join('');
   const todayHtml=todayX>0&&todayX<TOTAL_W?`<div class="tday" style="left:${todayX}px"></div>`:'';
 
-  // Header
   let html=`<div class="g-header">
     <div class="fixed" style="background:var(--dim);font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;padding:0 14px;display:flex;align-items:center;min-height:50px">工作項目</div>
     <div class="scrollable" id="sh" style="background:var(--dim)">
@@ -329,7 +327,6 @@ function render(){
 
 function toggleCat(c){coll[c]=!coll[c];render();}
 
-// 同步所有捲動區
 function setupSync(){
   const all=[document.getElementById('sh'),...document.querySelectorAll('.ss')].filter(Boolean);
   let isSyncing=false;
