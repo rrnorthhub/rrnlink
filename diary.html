@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>工作日誌｜北輔中心</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green:    #4e7566;
+  --green-lt: #eef3f0;
+  --green-dk: #3a5a4e;
+  --sand:     #f7f4ef;
+  --ink:      #1a1a18;
+  --muted:    #6b6760;
+  --border:   #e2ddd8;
+  --white:    #ffffff;
+  --radius:   10px;
+  --shadow:   0 1px 4px rgba(0,0,0,.08);
+}
+body { font-family: 'Noto Sans TC', sans-serif; background: var(--sand); color: var(--ink); min-height: 100vh; }
+
+/* Header */
+.header { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 900px; margin: 0 auto; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+.header-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.header-logo { width: 32px; height: 32px; border-radius: 8px; background: var(--green); color: #fff; font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+.header-title { font-size: 14px; font-weight: 700; }
+.header-sub { font-size: 11px; color: var(--muted); }
+.back-btn { font-size: 13px; color: var(--green); font-weight: 500; text-decoration: none; padding: 6px 14px; border: 1px solid var(--green); border-radius: 6px; }
+.back-btn:hover { background: var(--green-lt); }
+
+/* Page */
+.page { max-width: 900px; margin: 0 auto; padding: 28px 24px 64px; }
+
+/* 週切換 */
+.week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.week-nav-title { font-size: 18px; font-weight: 900; flex: 1; }
+.week-nav-title span { color: var(--green); }
+.nav-btn { padding: 6px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); font-size: 13px; color: var(--muted); cursor: pointer; font-family: inherit; transition: all .15s; }
+.nav-btn:hover { border-color: var(--green); color: var(--green); }
+.nav-btn.current { background: var(--green-lt); border-color: var(--green); color: var(--green); font-weight: 700; }
+
+/* 週總覽 bar */
+.week-bar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 20px; }
+.day-chip { padding: 8px 4px; border-radius: 8px; text-align: center; cursor: pointer; border: 2px solid transparent; background: var(--white); transition: all .15s; }
+.day-chip:hover { border-color: var(--border); }
+.day-chip.active { border-color: var(--green); background: var(--green-lt); }
+.day-chip.has-data { position: relative; }
+.day-chip.has-data::after { content: ''; position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.day-chip.is-today .chip-date { color: var(--green); font-weight: 900; }
+.day-chip.is-weekend .chip-weekday { color: #b05c5c; }
+.chip-weekday { font-size: 11px; color: var(--muted); }
+.chip-date { font-size: 15px; font-weight: 700; margin-top: 2px; }
+
+/* 日誌填寫區 */
+.day-editor { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.day-editor-header { padding: 14px 20px; background: var(--sand); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.day-editor-date { font-size: 16px; font-weight: 900; }
+.day-editor-weekday { font-size: 13px; color: var(--muted); }
+.save-status { margin-left: auto; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.save-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); }
+.save-dot.saving { background: var(--green); animation: pulse .8s infinite; }
+.save-dot.saved  { background: var(--green); }
+.save-dot.error  { background: #b05c5c; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* 欄位列表 */
+.county-list { padding: 8px 0; }
+.county-row { border-bottom: 1px solid var(--border); }
+.county-row:last-child { border-bottom: none; }
+.county-toggle { display: flex; align-items: center; gap: 10px; padding: 12px 20px; cursor: pointer; user-select: none; }
+.county-toggle-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: background .2s; }
+.county-row.open .county-toggle-dot,
+.county-row.has-content .county-toggle-dot { background: var(--green); }
+.county-toggle-name { font-size: 13px; font-weight: 700; flex: 1; }
+.county-preview { font-size: 12px; color: var(--muted); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.county-arrow { font-size: 11px; color: var(--muted); transition: transform .2s; }
+.county-row.open .county-arrow { transform: rotate(180deg); }
+.county-body { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+.county-row.open .county-body { max-height: 500px; }
+.county-textarea {
+  width: 100%; padding: 14px 20px 16px;
+  border: none; outline: none; resize: vertical;
+  font-family: inherit; font-size: 13px; line-height: 1.9;
+  color: var(--ink); background: #fdfcfa;
+  min-height: 90px; border-top: 1px solid var(--border);
+}
+
+/* 辦公室（預設展開，樣式突出） */
+.office-row { border-bottom: 1px solid var(--border); background: var(--green-lt); }
+.office-toggle { display: flex; align-items: center; gap: 10px; padding: 12px 20px; }
+.office-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.office-name { font-size: 13px; font-weight: 700; color: var(--green-dk); }
+.office-textarea {
+  width: 100%; padding: 14px 20px 16px;
+  border: none; outline: none; resize: vertical;
+  font-family: inherit; font-size: 13px; line-height: 1.9;
+  color: var(--ink); background: var(--white);
+  min-height: 90px; border-top: 1px solid var(--border);
+}
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: #fff; padding: 10px 22px; border-radius: 8px; font-size: 13px; opacity: 0; transition: all .3s; z-index: 999; white-space: nowrap; pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast.error { background: #b05c5c; }
+
+@media (max-width: 600px) {
+  .page { padding: 16px 12px 48px; }
+  .chip-date { font-size: 13px; }
+  .county-preview { display: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <a href="/#internal" class="header-brand">
+      <div class="header-logo">北</div>
+      <div>
+        <div class="header-title">地方創生北區輔導中心</div>
+        <div class="header-sub">工作日誌</div>
+      </div>
+    </a>
+    <a href="/#internal" class="back-btn">← 返回儀表板</a>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- 週切換 -->
+  <div class="week-nav">
+    <div class="week-nav-title" id="weekTitle">載入中…</div>
+    <button class="nav-btn" onclick="changeWeek(-1)">◀ 上週</button>
+    <button class="nav-btn current" onclick="goThisWeek()">本週</button>
+    <button class="nav-btn" onclick="changeWeek(1)">下週 ▶</button>
+  </div>
+
+  <!-- 週日曆 bar -->
+  <div class="week-bar" id="weekBar"></div>
+
+  <!-- 當天編輯器 -->
+  <div class="day-editor" id="dayEditor">
+    <div class="day-editor-header">
+      <span class="day-editor-date" id="editorDate"></span>
+      <span class="day-editor-weekday" id="editorWeekday"></span>
+      <div class="save-status">
+        <div class="save-dot" id="saveDot"></div>
+        <span id="saveText">—</span>
+      </div>
+    </div>
+    <div class="county-list" id="countyList"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GAS_URL  = 'https://script.google.com/macros/s/AKfycbywmZoyoeZhplJWQ5l9vWPf2mS1Fu0W2rADpdXAcTxzbRmOI-a7-cgjmBPEeItI9UlE/exec';
+const SHEET_ID = '12zqi5Kl1aPgB1R6Kbo3nc5CPsBFpwvSxArGXF1Hu9oA';
+const COUNTIES = ['辦公室','基隆市','臺北市','新北市','桃園市','新竹縣','新竹市','金門縣','連江縣'];
+const WEEKDAYS = ['日','一','二','三','四','五','六'];
+
+let currentWeekOffset = 0; // 0 = 本週
+let selectedDate = '';      // MM-DD
+let weekData = {};          // { 'MM-DD': { 辦公室:'...', 基隆市:'...' } }
+let saveTimers = {};        // debounce timers
+
+// ── 週計算 ────────────────────────────────────────
+function getWeekDates(offset) {
+  const today = new Date();
+  const day = today.getDay() || 7;
+  const mon = new Date(today);
+  mon.setDate(today.getDate() - day + 1 + offset * 7);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + i);
+    return d;
+  });
+}
+
+function toMMDD(d) {
+  return String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function todayMMDD() {
+  return toMMDD(new Date());
+}
+
+// ── 載入週資料 ────────────────────────────────────
+async function loadWeek() {
+  const dates = getWeekDates(currentWeekOffset);
+  const dateStrs = dates.map(toMMDD);
+
+  // 更新週標題
+  const mon = dates[0], sun = dates[6];
+  document.getElementById('weekTitle').innerHTML =
+    `${mon.getFullYear()} 年 <span>${mon.getMonth()+1}/${mon.getDate()} – ${sun.getMonth()+1}/${sun.getDate()}</span>`;
+
+  // 先清空畫面
+  weekData = {};
+  renderWeekBar(dates);
+
+  // 讀取 Sheets 資料
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+    const res  = await fetch(url);
+    const text = await res.text();
+    const json = JSON.parse(text.replace(/^[^\(]+\(/, '').replace(/\);?\s*$/, ''));
+    const rows = json.table.rows.map(r => r.c.map(c => c ? String(c.f || c.v || '').trim() : ''));
+
+    rows.forEach(r => {
+      const d = String(r[0]).trim();
+      if (dateStrs.includes(d)) {
+        weekData[d] = {
+          '辦公室': r[1] || '',
+          '基隆市': r[2] || '',
+          '臺北市': r[3] || '',
+          '新北市': r[4] || '',
+          '桃園市': r[5] || '',
+          '新竹縣': r[6] || '',
+          '新竹市': r[7] || '',
+          '金門縣': r[8] || '',
+          '連江縣': r[9] || '',
+        };
+      }
+    });
+  } catch(e) {
+    console.error('載入失敗', e);
+  }
+
+  renderWeekBar(dates);
+
+  // 預設選今天（本週）或週一（其他週）
+  const today = todayMMDD();
+  if (dateStrs.includes(today) && currentWeekOffset === 0) {
+    selectDay(today, dates.find(d => toMMDD(d) === today));
+  } else {
+    selectDay(dateStrs[0], dates[0]);
+  }
+}
+
+// ── 週日曆 bar ────────────────────────────────────
+function renderWeekBar(dates) {
+  const today = todayMMDD();
+  document.getElementById('weekBar').innerHTML = dates.map(d => {
+    const mmdd = toMMDD(d);
+    const hasData = weekData[mmdd] && Object.values(weekData[mmdd]).some(v => v.trim());
+    const isToday = mmdd === today;
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+    const isActive = mmdd === selectedDate;
+    return `<div class="day-chip ${hasData?'has-data':''} ${isToday?'is-today':''} ${isWeekend?'is-weekend':''} ${isActive?'active':''}"
+      onclick="selectDay('${mmdd}', null, ${d.getTime()})">
+      <div class="chip-weekday">週${WEEKDAYS[d.getDay()]}</div>
+      <div class="chip-date">${d.getDate()}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── 選擇日期 ──────────────────────────────────────
+function selectDay(mmdd, dateObj, timestamp) {
+  selectedDate = mmdd;
+  if (!dateObj && timestamp) dateObj = new Date(timestamp);
+
+  // 更新 bar active 狀態
+  const dates = getWeekDates(currentWeekOffset);
+  renderWeekBar(dates);
+
+  // 更新編輯器標題
+  document.getElementById('editorDate').textContent = `2026 / ${mmdd.replace('-','/')}`;
+  document.getElementById('editorWeekday').textContent = dateObj ? `週${WEEKDAYS[dateObj.getDay()]}` : '';
+  setSaveStatus('idle');
+
+  // 渲染縣市欄位
+  renderEditor(mmdd);
+}
+
+// ── 編輯器 ────────────────────────────────────────
+function renderEditor(mmdd) {
+  const data = weekData[mmdd] || {};
+  let html = '';
+
+  // 辦公室（固定展開）
+  html += `<div class="office-row">
+    <div class="office-toggle">
+      <div class="office-dot"></div>
+      <span class="office-name">北區輔導中心辦公室</span>
+    </div>
+    <textarea class="office-textarea" id="ta-辦公室"
+      placeholder="填寫今日辦公室工作內容…&#10;例：1.與桃園市開會  2.月報修改"
+      oninput="onInput('辦公室')"
+      onblur="saveField('辦公室')"
+    >${escHtml(data['辦公室'] || '')}</textarea>
+  </div>`;
+
+  // 各縣市
+  COUNTIES.slice(1).forEach(county => {
+    const val = data[county] || '';
+    const hasContent = val.trim().length > 0;
+    html += `<div class="county-row ${hasContent?'open has-content':''}" id="row-${county}">
+      <div class="county-toggle" onclick="toggleCounty('${county}')">
+        <div class="county-toggle-dot"></div>
+        <span class="county-toggle-name">${county}</span>
+        <span class="county-preview" id="preview-${county}">${escHtml(val.split('\n')[0] || '')}</span>
+        <span class="county-arrow">▾</span>
+      </div>
+      <div class="county-body">
+        <textarea class="county-textarea" id="ta-${county}"
+          placeholder="填寫 ${county} 今日工作內容…"
+          oninput="onInput('${county}')"
+          onblur="saveField('${county}')"
+        >${escHtml(val)}</textarea>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('countyList').innerHTML = html;
+}
+
+function toggleCounty(county) {
+  const row = document.getElementById('row-' + county);
+  const isOpen = row.classList.contains('open');
+  row.classList.toggle('open', !isOpen);
+  if (!isOpen) document.getElementById('ta-' + county).focus();
+}
+
+// ── 輸入處理（debounce 自動儲存）────────────────────
+function onInput(county) {
+  const val = document.getElementById('ta-' + county).value;
+
+  // 更新預覽
+  const preview = document.getElementById('preview-' + county);
+  if (preview) preview.textContent = val.split('\n')[0] || '';
+
+  // 更新 has-content
+  const row = document.getElementById('row-' + county);
+  if (row) row.classList.toggle('has-content', val.trim().length > 0);
+
+  // debounce 3秒後自動儲存
+  clearTimeout(saveTimers[county]);
+  setSaveStatus('pending');
+  saveTimers[county] = setTimeout(() => saveField(county), 3000);
+}
+
+// ── 儲存單一欄位 ──────────────────────────────────
+async function saveField(county) {
+  clearTimeout(saveTimers[county]);
+  const val = document.getElementById('ta-' + county)?.value ?? '';
+
+  // 更新本地快取
+  if (!weekData[selectedDate]) weekData[selectedDate] = {};
+  weekData[selectedDate][county] = val;
+
+  setSaveStatus('saving');
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ date: selectedDate, county, content: val }),
+    });
+    const json = await res.json();
+    if (json.ok) {
+      setSaveStatus('saved');
+      // 更新週 bar（可能新增了資料）
+      renderWeekBar(getWeekDates(currentWeekOffset));
+    } else {
+      throw new Error(json.error);
+    }
+  } catch(e) {
+    setSaveStatus('error');
+    showToast('儲存失敗，請稍後再試', true);
+    console.error(e);
+  }
+}
+
+// ── 儲存狀態 ──────────────────────────────────────
+function setSaveStatus(state) {
+  const dot  = document.getElementById('saveDot');
+  const text = document.getElementById('saveText');
+  dot.className = 'save-dot';
+  if (state === 'saving')  { dot.classList.add('saving'); text.textContent = '儲存中…'; }
+  else if (state === 'saved') { dot.classList.add('saved'); text.textContent = '已儲存'; }
+  else if (state === 'error') { dot.classList.add('error'); text.textContent = '儲存失敗'; }
+  else if (state === 'pending') { text.textContent = '有未儲存的內容'; }
+  else { text.textContent = '—'; }
+}
+
+// ── 週切換 ────────────────────────────────────────
+function changeWeek(delta) { currentWeekOffset += delta; loadWeek(); }
+function goThisWeek() { currentWeekOffset = 0; loadWeek(); }
+
+// ── 工具 ──────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// 啟動
+loadWeek();
+</script>
+</body>
+</html>
