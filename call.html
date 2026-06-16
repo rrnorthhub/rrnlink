@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>創生導航儀｜來電紀錄・北輔中心</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green:    #4e7566;
+    --green-lt: #eef3f0;
+    --sand:     #f7f4ef;
+    --ink:      #1a1a18;
+    --muted:    #6b6760;
+    --border:   #e2ddd8;
+    --white:    #ffffff;
+    --tag-wait:   #fef3c7;
+    --tag-wait-t: #92400e;
+    --tag-track:  #dbeafe;
+    --tag-track-t:#1e40af;
+    --tag-done:   #dcfce7;
+    --tag-done-t: #166534;
+    --radius: 10px;
+    --shadow: 0 1px 4px rgba(0,0,0,.08);
+  }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--sand);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner {
+    max-width: 1100px; margin: 0 auto;
+    padding: 0 24px;
+    height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .header-brand {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; color: inherit;
+  }
+  .header-logo {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--green); color: #fff;
+    font-size: 15px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .header-title { font-size: 14px; font-weight: 700; }
+  .header-sub   { font-size: 11px; color: var(--muted); }
+  .back-btn {
+    font-size: 13px; color: var(--green); font-weight: 500;
+    text-decoration: none;
+    padding: 6px 14px; border: 1px solid var(--green);
+    border-radius: 6px;
+    transition: background .15s;
+  }
+  .back-btn:hover { background: var(--green-lt); }
+
+  /* ── Page layout ── */
+  .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  .page-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 28px; flex-wrap: wrap; gap: 16px;
+  }
+  .page-title { font-size: 22px; font-weight: 900; }
+  .page-title span { color: var(--green); }
+  .page-desc { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .new-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--green); color: #fff;
+    font-size: 14px; font-weight: 700;
+    padding: 10px 22px; border-radius: 8px;
+    text-decoration: none;
+    transition: opacity .15s;
+    white-space: nowrap;
+  }
+  .new-btn:hover { opacity: .88; }
+  .new-btn svg { width: 16px; height: 16px; }
+
+  /* ── Stats bar ── */
+  .stats-bar {
+    display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .stat-pill {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 20px; padding: 6px 16px;
+    font-size: 13px; color: var(--muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .stat-pill strong { color: var(--ink); font-weight: 700; }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-label { font-size: 13px; color: var(--muted); }
+  .filter-btn {
+    font-size: 13px; padding: 5px 14px;
+    border: 1px solid var(--border); border-radius: 20px;
+    background: var(--white); color: var(--muted);
+    cursor: pointer; transition: all .15s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    border-color: var(--green); color: var(--green);
+    background: var(--green-lt);
+  }
+  .search-input {
+    margin-left: auto;
+    padding: 6px 14px; border: 1px solid var(--border);
+    border-radius: 20px; font-size: 13px;
+    font-family: inherit; outline: none;
+    background: var(--white); width: 200px;
+    transition: border-color .15s;
+  }
+  .search-input:focus { border-color: var(--green); }
+
+  /* ── Table ── */
+  .table-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13px;
+  }
+  thead {
+    background: var(--sand);
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    padding: 10px 16px; text-align: left;
+    font-weight: 700; color: var(--muted);
+    font-size: 12px; white-space: nowrap;
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafaf8; }
+
+  .case-id {
+    font-family: monospace; font-size: 12px;
+    color: var(--muted);
+  }
+  .case-name { font-weight: 500; }
+  .case-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* 追蹤狀態 tag */
+  .tag {
+    display: inline-block;
+    padding: 2px 10px; border-radius: 12px;
+    font-size: 12px; font-weight: 500;
+    white-space: nowrap;
+  }
+  .tag-待聯繫  { background: var(--tag-wait);  color: var(--tag-wait-t); }
+  .tag-持續追蹤 { background: var(--tag-track); color: var(--tag-track-t); }
+  .tag-已結案  { background: var(--tag-done);  color: var(--tag-done-t); }
+  .tag-default { background: #f1f0ef; color: var(--muted); }
+
+  .location-badge {
+    display: inline-block;
+    background: var(--green-lt); color: var(--green);
+    padding: 2px 8px; border-radius: 4px;
+    font-size: 12px; font-weight: 500;
+  }
+
+  /* ── Loading / empty ── */
+  .state-box {
+    padding: 60px 24px; text-align: center; color: var(--muted);
+  }
+  .state-box .state-icon { font-size: 36px; margin-bottom: 12px; }
+  .state-box p { font-size: 14px; }
+
+  /* ── 頁尾 ── */
+  .sync-note {
+    margin-top: 16px; font-size: 12px; color: var(--muted);
+    text-align: right;
+  }
+  .sync-note a { color: var(--green); text-decoration: none; }
+  .sync-note a:hover { text-decoration: underline; }
+
+  @media (max-width: 768px) {
+    .page { padding: 20px 16px 48px; }
+    .search-input { width: 100%; margin-left: 0; }
+    table { font-size: 12px; }
+    th, td { padding: 10px 12px; }
+    .col-diag, .col-tag { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <a href="/" class="header-brand">
+      <div class="header-logo">北</div>
+      <div>
+        <div class="header-title">地方創生北區輔導中心</div>
+        <div class="header-sub">創生導航儀｜來電紀錄</div>
+      </div>
+    </a>
+    <a href="/" class="back-btn">← 返回儀表板</a>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">來電紀錄 <span>/ 案件管理</span></h1>
+      <p class="page-desc">資料即時從 Google Sheets 讀取・輔導老師可直接在試算表補填診斷資訊</p>
+    </div>
+    <a href="https://script.google.com/macros/s/AKfycbxVJ8um38au0mlNP2uFK4KF-lqGZT6tfrRAudRWYH3zEUCfXPPoXwPiw3ByLibGDGFH/exec"
+       target="_blank" class="new-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      新增來電
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-pill">載入中…</div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <span class="filter-label">篩選：</span>
+    <button class="filter-btn active" onclick="setFilter('all', this)">全部</button>
+    <button class="filter-btn" onclick="setFilter('待聯繫', this)">待聯繫</button>
+    <button class="filter-btn" onclick="setFilter('持續追蹤', this)">持續追蹤</button>
+    <button class="filter-btn" onclick="setFilter('已結案', this)">已結案</button>
+    <input type="text" class="search-input" id="searchInput"
+           placeholder="搜尋案件編號、地點、來電者…"
+           oninput="renderTable()">
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>案件編號</th>
+          <th>日期</th>
+          <th>提案地點</th>
+          <th>來電者／單位</th>
+          <th>接線同仁</th>
+          <th class="col-tag">追蹤狀態</th>
+          <th class="col-diag">輔導老師</th>
+          <th>最後聯繫</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="8">
+          <div class="state-box">
+            <div class="state-icon">⏳</div>
+            <p>資料載入中，請稍候…</p>
+          </div>
+        </td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="sync-note">
+    資料來源：<a href="https://docs.google.com/spreadsheets/d/1AljjhhUrhPP2UBDbHe_Q8WU0MDi3wvl19rU-adcOn-I" target="_blank">來電紀錄試算表</a>
+    ・每次開啟頁面自動同步
+  </p>
+
+</div>
+
+<script>
+// ── 設定 ──────────────────────────────────────────
+const SHEET_ID  = '1AljjhhUrhPP2UBDbHe_Q8WU0MDi3wvl19rU-adcOn-I';
+const SHEET_NAME = 'Sheet1'; // 試算表第一個工作表名稱，如有不同請調整
+const API_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+// 欄位索引（0-based，對應試算表欄位順序）
+const COL = {
+  ID:       0,   // 案件編號
+  CREATED:  1,   // 建立時間
+  UPDATED:  2,   // 最後更新時間
+  STAFF:    3,   // 接線同仁
+  LOCATION: 4,   // 提案地點
+  TEACHER:  7,   // 輔導老師
+  CALLER:   9,   // 來電者姓名
+  UNIT:     10,  // 單位名稱
+  STATUS:   35,  // 案件追蹤狀態
+  LAST_DATE:37,  // 最後聯繫日期
+};
+
+let allRows = [];
+let currentFilter = 'all';
+
+// ── 資料載入 ──────────────────────────────────────
+async function loadData() {
+  try {
+    const res  = await fetch(API_URL);
+    const text = await res.text();
+    // Google gviz 回傳格式去掉前綴
+    const json = JSON.parse(text.replace(/^[^\(]+\(/, '').replace(/\);?\s*$/, ''));
+    const rows = json.table.rows;
+
+    allRows = rows
+      .map(r => r.c.map(c => c ? (c.f || c.v || '') : ''))
+      .filter(r => r[COL.ID] && String(r[COL.ID]).trim()); // 過濾空列
+
+    renderStats();
+    renderTable();
+  } catch (err) {
+    console.error(err);
+    document.getElementById('tableBody').innerHTML = `
+      <tr><td colspan="8">
+        <div class="state-box">
+          <div class="state-icon">⚠️</div>
+          <p>資料載入失敗，請確認試算表分享設定為「知道連結的人可以檢視」</p>
+        </div>
+      </td></tr>`;
+  }
+}
+
+// ── 統計列 ────────────────────────────────────────
+function renderStats() {
+  const total   = allRows.length;
+  const waiting = allRows.filter(r => r[COL.STATUS] === '待聯繫').length;
+  const tracking= allRows.filter(r => r[COL.STATUS] === '持續追蹤').length;
+  const done    = allRows.filter(r => r[COL.STATUS] === '已結案').length;
+
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-pill">共 <strong>${total}</strong> 件</div>
+    <div class="stat-pill">待聯繫 <strong>${waiting}</strong></div>
+    <div class="stat-pill">持續追蹤 <strong>${tracking}</strong></div>
+    <div class="stat-pill">已結案 <strong>${done}</strong></div>
+  `;
+}
+
+// ── 篩選 & 搜尋 ───────────────────────────────────
+function setFilter(val, btn) {
+  currentFilter = val;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+function renderTable() {
+  const keyword = document.getElementById('searchInput').value.toLowerCase();
+
+  const filtered = allRows.filter(r => {
+    const matchFilter = currentFilter === 'all' || r[COL.STATUS] === currentFilter;
+    const matchSearch = !keyword ||
+      String(r[COL.ID]).toLowerCase().includes(keyword) ||
+      String(r[COL.LOCATION]).toLowerCase().includes(keyword) ||
+      String(r[COL.CALLER]).toLowerCase().includes(keyword) ||
+      String(r[COL.UNIT]).toLowerCase().includes(keyword) ||
+      String(r[COL.STAFF]).toLowerCase().includes(keyword);
+    return matchFilter && matchSearch;
+  });
+
+  if (!filtered.length) {
+    document.getElementById('tableBody').innerHTML = `
+      <tr><td colspan="8">
+        <div class="state-box">
+          <div class="state-icon">🔍</div>
+          <p>沒有符合條件的案件</p>
+        </div>
+      </td></tr>`;
+    return;
+  }
+
+  const rows = filtered.map(r => {
+    const status = String(r[COL.STATUS] || '').trim();
+    const tagClass = ['待聯繫','持續追蹤','已結案'].includes(status)
+      ? `tag-${status}` : 'tag-default';
+
+    // 日期只取前10碼
+    const created  = String(r[COL.CREATED] || '').slice(0, 10);
+    const lastDate = String(r[COL.LAST_DATE] || '').slice(0, 10);
+
+    return `
+      <tr>
+        <td class="case-id">${escHtml(r[COL.ID])}</td>
+        <td>${escHtml(created)}</td>
+        <td><span class="location-badge">${escHtml(r[COL.LOCATION])}</span></td>
+        <td>
+          <div class="case-name">${escHtml(r[COL.CALLER])}</div>
+          <div class="case-sub">${escHtml(r[COL.UNIT])}</div>
+        </td>
+        <td>${escHtml(r[COL.STAFF])}</td>
+        <td class="col-tag"><span class="tag ${tagClass}">${escHtml(status) || '—'}</span></td>
+        <td class="col-diag">${escHtml(r[COL.TEACHER])}</td>
+        <td>${escHtml(lastDate) || '—'}</td>
+      </tr>`;
+  }).join('');
+
+  document.getElementById('tableBody').innerHTML = rows;
+}
+
+function escHtml(str) {
+  return String(str ?? '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── 啟動 ──────────────────────────────────────────
+loadData();
+</script>
+</body>
+</html>
