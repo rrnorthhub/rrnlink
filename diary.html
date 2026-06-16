@@ -358,32 +358,24 @@ async function saveField(county) {
   setSaveStatus('saving');
 
   try {
-    // Apps Script 不支援 CORS，用 no-cors 送出
-    // 送出後等 2 秒再重新讀取該欄位確認是否寫入成功
-    await fetch(GAS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify({ date: selectedDate, county, content: val }),
+    // 用 GET + jsonp 方式送出，避免 CORS 問題
+    const params = new URLSearchParams({
+      action: 'write',
+      date: selectedDate,
+      county: county,
+      content: val,
     });
+    const url = `${GAS_URL}?${params.toString()}`;
 
-    // 等 2 秒後用 GET 確認是否存入
-    await new Promise(r => setTimeout(r, 2000));
-    const checkUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
-    const res = await fetch(checkUrl);
+    const res = await fetch(url);
     const text = await res.text();
     const json = JSON.parse(text.replace(/^[^\(]+\(/, '').replace(/\);?\s*$/, ''));
-    const rows = json.table.rows.map(r => r.c.map(c => c ? String(c.f || c.v || '').trim() : ''));
-    const row = rows.find(r => String(r[0]).trim() === selectedDate);
-    const colIdx = ['辦公室','基隆市','臺北市','新北市','桃園市','新竹縣','新竹市','金門縣','連江縣'].indexOf(county);
-    const saved = row && row[colIdx + 1] === val.trim();
 
-    if (saved || val.trim() === '') {
+    if (json.ok) {
       setSaveStatus('saved');
       renderWeekBar(getWeekDates(currentWeekOffset));
     } else {
-      setSaveStatus('saved'); // no-cors 無法確認，預設視為成功
-      renderWeekBar(getWeekDates(currentWeekOffset));
+      throw new Error(json.error);
     }
   } catch(e) {
     setSaveStatus('error');
