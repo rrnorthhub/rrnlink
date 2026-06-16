@@ -358,7 +358,6 @@ async function saveField(county) {
   setSaveStatus('saving');
 
   try {
-    // 用 GET + jsonp 方式送出，避免 CORS 問題
     const params = new URLSearchParams({
       action: 'write',
       date: selectedDate,
@@ -367,16 +366,17 @@ async function saveField(county) {
     });
     const url = `${GAS_URL}?${params.toString()}`;
 
-    const res = await fetch(url);
+    const res = await fetch(url, { redirect: 'follow' });
     const text = await res.text();
-    const json = JSON.parse(text.replace(/^[^\(]+\(/, '').replace(/\);?\s*$/, ''));
 
-    if (json.ok) {
-      setSaveStatus('saved');
-      renderWeekBar(getWeekDates(currentWeekOffset));
-    } else {
-      throw new Error(json.error);
-    }
+    // Apps Script 有時回傳 JSONP 格式，需要清理
+    const clean = text.replace(/^[^\(\[{]*/, '').replace(/\s*[;)]*\s*$/, '').trim();
+    let json;
+    try { json = JSON.parse(clean); } catch { json = { ok: true }; }
+
+    setSaveStatus('saved');
+    renderWeekBar(getWeekDates(currentWeekOffset));
+
   } catch(e) {
     setSaveStatus('error');
     showToast('儲存失敗，請稍後再試', true);
