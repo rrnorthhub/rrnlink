@@ -345,18 +345,6 @@
   </footer>
 
   <script src="app.js"></script>
-  <script>
-    // 從內部頁面返回時，自動切換到內部工作區（不需重新輸入密碼）
-    if (window.location.hash === '#internal') {
-      const wasLoggedIn = sessionStorage.getItem('nrrc_auth');
-      if (wasLoggedIn === 'true') {
-        showView('internal');
-      } else {
-        showView('login');
-      }
-      // 清掉 hash，避免重新整理時重複觸發
-      history.replaceState(null, '', window.location.pathname);
-    }
-  </script>
+  
 </body>
 </html>
