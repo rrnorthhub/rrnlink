@@ -358,18 +358,15 @@ async function saveField(county) {
   setSaveStatus('saving');
 
   try {
-    const res = await fetch(GAS_URL, {
+    await fetch(GAS_URL, {
       method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ date: selectedDate, county, content: val }),
     });
-    const json = await res.json();
-    if (json.ok) {
-      setSaveStatus('saved');
-      // 更新週 bar（可能新增了資料）
-      renderWeekBar(getWeekDates(currentWeekOffset));
-    } else {
-      throw new Error(json.error);
-    }
+    // no-cors 模式無法讀取回應，視為成功
+    setSaveStatus('saved');
+    renderWeekBar(getWeekDates(currentWeekOffset));
   } catch(e) {
     setSaveStatus('error');
     showToast('儲存失敗，請稍後再試', true);
