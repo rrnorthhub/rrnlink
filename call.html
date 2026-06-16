@@ -17,193 +17,112 @@
     --muted:    #6b6760;
     --border:   #e2ddd8;
     --white:    #ffffff;
-    --tag-wait:   #fef3c7;
-    --tag-wait-t: #92400e;
-    --tag-track:  #dbeafe;
-    --tag-track-t:#1e40af;
-    --tag-done:   #dcfce7;
-    --tag-done-t: #166534;
+    --orange:   #c47c3c;
+    --orange-lt:#fdf3e9;
     --radius: 10px;
     --shadow: 0 1px 4px rgba(0,0,0,.08);
   }
 
-  body {
-    font-family: 'Noto Sans TC', sans-serif;
-    background: var(--sand);
-    color: var(--ink);
-    min-height: 100vh;
-  }
+  body { font-family: 'Noto Sans TC', sans-serif; background: var(--sand); color: var(--ink); min-height: 100vh; }
 
   /* ── Header ── */
-  .header {
-    background: var(--white);
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 100;
-  }
-  .header-inner {
-    max-width: 1100px; margin: 0 auto;
-    padding: 0 24px;
-    height: 56px;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .header-brand {
-    display: flex; align-items: center; gap: 10px;
-    text-decoration: none; color: inherit;
-  }
-  .header-logo {
-    width: 32px; height: 32px; border-radius: 8px;
-    background: var(--green); color: #fff;
-    font-size: 15px; font-weight: 900;
-    display: flex; align-items: center; justify-content: center;
-  }
+  .header { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  .header-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+  .header-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+  .header-logo { width: 32px; height: 32px; border-radius: 8px; background: var(--green); color: #fff; font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
   .header-title { font-size: 14px; font-weight: 700; }
   .header-sub   { font-size: 11px; color: var(--muted); }
-  .back-btn {
-    font-size: 13px; color: var(--green); font-weight: 500;
-    text-decoration: none;
-    padding: 6px 14px; border: 1px solid var(--green);
-    border-radius: 6px;
-    transition: background .15s;
-  }
+  .back-btn { font-size: 13px; color: var(--green); font-weight: 500; text-decoration: none; padding: 6px 14px; border: 1px solid var(--green); border-radius: 6px; transition: background .15s; }
   .back-btn:hover { background: var(--green-lt); }
 
   /* ── Page layout ── */
   .page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 64px; }
 
-  .page-header {
-    display: flex; align-items: flex-end; justify-content: space-between;
-    margin-bottom: 28px; flex-wrap: wrap; gap: 16px;
-  }
+  .page-header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
   .page-title { font-size: 22px; font-weight: 900; }
   .page-title span { color: var(--green); }
   .page-desc { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-  .new-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--green); color: #fff;
-    font-size: 14px; font-weight: 700;
-    padding: 10px 22px; border-radius: 8px;
-    text-decoration: none;
-    transition: opacity .15s;
-    white-space: nowrap;
-  }
+  .new-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--green); color: #fff; font-size: 14px; font-weight: 700; padding: 10px 22px; border-radius: 8px; text-decoration: none; transition: opacity .15s; white-space: nowrap; }
   .new-btn:hover { opacity: .88; }
   .new-btn svg { width: 16px; height: 16px; }
 
+  /* ── Tab 切換 ── */
+  .tab-bar { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 2px solid var(--border); }
+  .tab-btn {
+    padding: 10px 24px; font-size: 14px; font-weight: 700;
+    color: var(--muted); background: none; border: none;
+    cursor: pointer; border-bottom: 2px solid transparent;
+    margin-bottom: -2px; transition: all .15s;
+  }
+  .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+  .tab-btn:hover:not(.active) { color: var(--ink); }
+  .tab-count { font-size: 12px; font-weight: 500; background: var(--sand); border-radius: 10px; padding: 1px 8px; margin-left: 6px; }
+  .tab-btn.active .tab-count { background: var(--green-lt); color: var(--green); }
+
   /* ── Stats bar ── */
-  .stats-bar {
-    display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;
-  }
-  .stat-pill {
-    background: var(--white); border: 1px solid var(--border);
-    border-radius: 20px; padding: 6px 16px;
-    font-size: 13px; color: var(--muted);
-    display: flex; align-items: center; gap: 6px;
-  }
+  .stats-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .stat-pill { background: var(--white); border: 1px solid var(--border); border-radius: 20px; padding: 6px 16px; font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
   .stat-pill strong { color: var(--ink); font-weight: 700; }
 
   /* ── Filter bar ── */
-  .filter-bar {
-    display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
-    align-items: center;
-  }
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
   .filter-label { font-size: 13px; color: var(--muted); }
-  .filter-btn {
-    font-size: 13px; padding: 5px 14px;
-    border: 1px solid var(--border); border-radius: 20px;
-    background: var(--white); color: var(--muted);
-    cursor: pointer; transition: all .15s;
-  }
-  .filter-btn.active, .filter-btn:hover {
-    border-color: var(--green); color: var(--green);
-    background: var(--green-lt);
-  }
-  .search-input {
-    margin-left: auto;
-    padding: 6px 14px; border: 1px solid var(--border);
-    border-radius: 20px; font-size: 13px;
-    font-family: inherit; outline: none;
-    background: var(--white); width: 200px;
-    transition: border-color .15s;
-  }
+  .filter-btn { font-size: 13px; padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px; background: var(--white); color: var(--muted); cursor: pointer; transition: all .15s; }
+  .filter-btn.active, .filter-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-lt); }
+  .search-input { margin-left: auto; padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 13px; font-family: inherit; outline: none; background: var(--white); width: 200px; transition: border-color .15s; }
   .search-input:focus { border-color: var(--green); }
 
   /* ── Table ── */
-  .table-wrap {
-    background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: var(--shadow);
-  }
-  table {
-    width: 100%; border-collapse: collapse;
-    font-size: 13px;
-  }
-  thead {
-    background: var(--sand);
-    border-bottom: 1px solid var(--border);
-  }
-  th {
-    padding: 10px 16px; text-align: left;
-    font-weight: 700; color: var(--muted);
-    font-size: 12px; white-space: nowrap;
-  }
-  td {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-  }
+  .table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: var(--sand); border-bottom: 1px solid var(--border); }
+  th { padding: 10px 16px; text-align: left; font-weight: 700; color: var(--muted); font-size: 12px; white-space: nowrap; }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: #fafaf8; }
 
-  .case-id {
-    font-family: monospace; font-size: 12px;
-    color: var(--muted);
-  }
+  .case-id { font-family: monospace; font-size: 12px; color: var(--muted); }
   .case-name { font-weight: 500; }
   .case-sub  { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
   /* 追蹤狀態 tag */
-  .tag {
-    display: inline-block;
-    padding: 2px 10px; border-radius: 12px;
-    font-size: 12px; font-weight: 500;
-    white-space: nowrap;
-  }
-  .tag-待聯繫  { background: var(--tag-wait);  color: var(--tag-wait-t); }
-  .tag-持續追蹤 { background: var(--tag-track); color: var(--tag-track-t); }
-  .tag-已結案  { background: var(--tag-done);  color: var(--tag-done-t); }
-  .tag-default { background: #f1f0ef; color: var(--muted); }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .tag-待聯繫    { background: #fef3c7; color: #92400e; }
+  .tag-已聯繫    { background: #dbeafe; color: #1e40af; }
+  .tag-輔導中    { background: #ede9fe; color: #5b21b6; }
+  .tag-資源媒合中  { background: #fce7f3; color: #9d174d; }
+  .tag-提案規劃中  { background: #e0f2fe; color: #075985; }
+  .tag-已送件    { background: #d1fae5; color: #065f46; }
+  .tag-已核定    { background: #dcfce7; color: #166534; }
+  .tag-未成案    { background: #fee2e2; color: #991b1b; }
+  .tag-已結案    { background: #f1f0ef; color: #6b6760; }
+  .tag-跨區轉介   { background: var(--orange-lt); color: var(--orange); }
+  .tag-default   { background: #f1f0ef; color: var(--muted); }
 
-  .location-badge {
-    display: inline-block;
-    background: var(--green-lt); color: var(--green);
-    padding: 2px 8px; border-radius: 4px;
-    font-size: 12px; font-weight: 500;
-  }
+  .location-badge { display: inline-block; background: var(--green-lt); color: var(--green); padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+  .ref-badge { display: inline-block; background: var(--orange-lt); color: var(--orange); padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
 
   /* ── Loading / empty ── */
-  .state-box {
-    padding: 60px 24px; text-align: center; color: var(--muted);
-  }
+  .state-box { padding: 60px 24px; text-align: center; color: var(--muted); }
   .state-box .state-icon { font-size: 36px; margin-bottom: 12px; }
   .state-box p { font-size: 14px; }
 
   /* ── 頁尾 ── */
-  .sync-note {
-    margin-top: 16px; font-size: 12px; color: var(--muted);
-    text-align: right;
-  }
+  .sync-note { margin-top: 16px; font-size: 12px; color: var(--muted); text-align: right; }
   .sync-note a { color: var(--green); text-decoration: none; }
   .sync-note a:hover { text-decoration: underline; }
+
+  /* ── Tab 內容 ── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 
   @media (max-width: 768px) {
     .page { padding: 20px 16px 48px; }
     .search-input { width: 100%; margin-left: 0; }
     table { font-size: 12px; }
     th, td { padding: 10px 12px; }
-    .col-diag, .col-tag { display: none; }
+    .col-hide { display: none; }
   }
 </style>
 </head>
@@ -240,190 +159,300 @@
     </a>
   </div>
 
-  <!-- Stats -->
-  <div class="stats-bar" id="statsBar">
-    <div class="stat-pill">載入中…</div>
+  <!-- Tab 切換 -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('calls', this)">
+      來電紀錄 <span class="tab-count" id="callCount">—</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('referrals', this)">
+      跨區轉介 <span class="tab-count" id="refCount">—</span>
+    </button>
   </div>
 
-  <!-- Filter -->
-  <div class="filter-bar">
-    <span class="filter-label">篩選：</span>
-    <button class="filter-btn active" onclick="setFilter('all', this)">全部</button>
-    <button class="filter-btn" onclick="setFilter('待聯繫', this)">待聯繫</button>
-    <button class="filter-btn" onclick="setFilter('持續追蹤', this)">持續追蹤</button>
-    <button class="filter-btn" onclick="setFilter('已結案', this)">已結案</button>
-    <input type="text" class="search-input" id="searchInput"
-           placeholder="搜尋案件編號、地點、來電者…"
-           oninput="renderTable()">
+  <!-- ══ Tab 1：來電紀錄 ══ -->
+  <div class="tab-panel active" id="panel-calls">
+
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-pill">載入中…</div>
+    </div>
+
+    <div class="filter-bar">
+      <span class="filter-label">篩選：</span>
+      <button class="filter-btn active" onclick="setFilter('all', this, 'calls')">全部</button>
+      <button class="filter-btn" onclick="setFilter('待聯繫', this, 'calls')">待聯繫</button>
+      <button class="filter-btn" onclick="setFilter('已聯繫', this, 'calls')">已聯繫</button>
+      <button class="filter-btn" onclick="setFilter('輔導中', this, 'calls')">輔導中</button>
+      <button class="filter-btn" onclick="setFilter('資源媒合中', this, 'calls')">資源媒合中</button>
+      <button class="filter-btn" onclick="setFilter('提案規劃中', this, 'calls')">提案規劃中</button>
+      <button class="filter-btn" onclick="setFilter('已送件', this, 'calls')">已送件</button>
+      <button class="filter-btn" onclick="setFilter('已核定', this, 'calls')">已核定</button>
+      <button class="filter-btn" onclick="setFilter('未成案', this, 'calls')">未成案</button>
+      <button class="filter-btn" onclick="setFilter('已結案', this, 'calls')">已結案</button>
+      <input type="text" class="search-input" id="searchCalls"
+             placeholder="搜尋案件編號、地點、來電者…"
+             oninput="renderCallsTable()">
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>案件編號</th>
+            <th>建立日期</th>
+            <th>提案地點</th>
+            <th>來電者／單位</th>
+            <th>接線同仁</th>
+            <th>追蹤狀態</th>
+            <th class="col-hide">輔導老師</th>
+            <th class="col-hide">最後聯繫</th>
+          </tr>
+        </thead>
+        <tbody id="callsBody">
+          <tr><td colspan="8"><div class="state-box"><div class="state-icon">⏳</div><p>資料載入中…</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="sync-note">
+      資料來源：<a href="https://docs.google.com/spreadsheets/d/1AljjhhUrhPP2UBDbHe_Q8WU0MDi3wvl19rU-adcOn-I" target="_blank">來電紀錄試算表</a>・每次開啟頁面自動同步
+    </p>
   </div>
 
-  <!-- Table -->
-  <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th>案件編號</th>
-          <th>日期</th>
-          <th>提案地點</th>
-          <th>來電者／單位</th>
-          <th>接線同仁</th>
-          <th class="col-tag">追蹤狀態</th>
-          <th class="col-diag">輔導老師</th>
-          <th>最後聯繫</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr><td colspan="8">
-          <div class="state-box">
-            <div class="state-icon">⏳</div>
-            <p>資料載入中，請稍候…</p>
-          </div>
-        </td></tr>
-      </tbody>
-    </table>
-  </div>
+  <!-- ══ Tab 2：跨區轉介 ══ -->
+  <div class="tab-panel" id="panel-referrals">
 
-  <p class="sync-note">
-    資料來源：<a href="https://docs.google.com/spreadsheets/d/1AljjhhUrhPP2UBDbHe_Q8WU0MDi3wvl19rU-adcOn-I" target="_blank">來電紀錄試算表</a>
-    ・每次開啟頁面自動同步
-  </p>
+    <div class="stats-bar" id="refStatsBar">
+      <div class="stat-pill">載入中…</div>
+    </div>
+
+    <div class="filter-bar">
+      <span class="filter-label">篩選：</span>
+      <button class="filter-btn active" onclick="setFilter('all', this, 'referrals')">全部</button>
+      <input type="text" class="search-input" id="searchRefs"
+             placeholder="搜尋轉介編號、地點、來電者…"
+             oninput="renderRefsTable()">
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>轉介編號</th>
+            <th>轉介時間</th>
+            <th>提案地點</th>
+            <th>服務區域</th>
+            <th>轉介中心</th>
+            <th>來電者／單位</th>
+            <th class="col-hide">接線同仁</th>
+            <th class="col-hide">備註</th>
+          </tr>
+        </thead>
+        <tbody id="refsBody">
+          <tr><td colspan="8"><div class="state-box"><div class="state-icon">⏳</div><p>資料載入中…</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="sync-note">
+      資料來源：<a href="https://docs.google.com/spreadsheets/d/1AljjhhUrhPP2UBDbHe_Q8WU0MDi3wvl19rU-adcOn-I" target="_blank">來電紀錄試算表</a>（02_跨區轉介紀錄）・每次開啟頁面自動同步
+    </p>
+  </div>
 
 </div>
 
 <script>
-// ── 設定 ──────────────────────────────────────────
-const SHEET_ID  = '1AljjhhUrhPP2UBDbHe_Q8WU0MDi3wvl19rU-adcOn-I';
-const SHEET_NAME = 'Sheet1'; // 試算表第一個工作表名稱，如有不同請調整
-const API_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+const SHEET_ID = '1AljjhhUrhPP2UBDbHe_Q8WU0MDi3wvl19rU-adcOn-I';
 
-// 欄位索引（0-based，對應試算表欄位順序）
-const COL = {
-  ID:       0,   // 案件編號
-  CREATED:  1,   // 建立時間
-  UPDATED:  2,   // 最後更新時間
-  STAFF:    3,   // 接線同仁
-  LOCATION: 4,   // 提案地點
-  TEACHER:  7,   // 輔導老師
-  CALLER:   9,   // 來電者姓名
-  UNIT:     10,  // 單位名稱
-  STATUS:   35,  // 案件追蹤狀態
-  LAST_DATE:37,  // 最後聯繫日期
+// ── 欄位索引：來電紀錄 ──
+const C = {
+  ID:       0,  // 案件編號
+  CREATED:  1,  // 建立時間
+  UPDATED:  2,  // 最後更新時間
+  STAFF:    3,  // 接線同仁
+  LOCATION: 4,  // 提案地點
+  TEACHER:  7,  // 輔導老師
+  CALLER:   9,  // 來電者姓名
+  UNIT:     10, // 單位名稱
+  STATUS:   35, // 案件追蹤狀態
+  LAST_DATE:37, // 最後聯繫日期
 };
 
-let allRows = [];
-let currentFilter = 'all';
+// ── 欄位索引：跨區轉介 ──
+const R = {
+  ID:       0,  // 轉介編號
+  TIME:     1,  // 轉介時間
+  LOCATION: 2,  // 提案地點
+  AREA:     3,  // 服務區域
+  CENTER:   4,  // 轉介中心
+  PHONE:    5,  // 轉介電話
+  IDENTITY: 6,  // 來電身分
+  ROLE:     7,  // 來電角色
+  CALLER:   8,  // 來電者姓名
+  UNIT:     9,  // 單位名稱
+  NEED:     10, // 諮詢需求
+  STAFF:    11, // 接線同仁
+  NOTE:     12, // 備註
+};
+
+let allCalls = [];
+let allRefs  = [];
+let callFilter = 'all';
+let refFilter  = 'all';
+let currentTab = 'calls';
+
+// ── Tab 切換 ──────────────────────────────────────
+function switchTab(tab, btn) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+}
 
 // ── 資料載入 ──────────────────────────────────────
-async function loadData() {
+async function fetchSheet(sheetName) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const res  = await fetch(url);
+  const text = await res.text();
+  const json = JSON.parse(text.replace(/^[^\(]+\(/, '').replace(/\);?\s*$/, ''));
+  return json.table.rows.map(r => r.c.map(c => c ? (c.f || c.v || '') : ''));
+}
+
+async function loadAll() {
+  // 來電紀錄
   try {
-    const res  = await fetch(API_URL);
-    const text = await res.text();
-    // Google gviz 回傳格式去掉前綴
-    const json = JSON.parse(text.replace(/^[^\(]+\(/, '').replace(/\);?\s*$/, ''));
-    const rows = json.table.rows;
+    const rows = await fetchSheet('Sheet1');
+    allCalls = rows.filter(r => r[C.ID] && String(r[C.ID]).trim());
+    document.getElementById('callCount').textContent = allCalls.length;
+    renderCallsStats();
+    renderCallsTable();
+  } catch(e) {
+    document.getElementById('callsBody').innerHTML =
+      `<tr><td colspan="8"><div class="state-box"><div class="state-icon">⚠️</div><p>來電紀錄載入失敗</p></div></td></tr>`;
+  }
 
-    allRows = rows
-      .map(r => r.c.map(c => c ? (c.f || c.v || '') : ''))
-      .filter(r => r[COL.ID] && String(r[COL.ID]).trim()); // 過濾空列
-
-    renderStats();
-    renderTable();
-  } catch (err) {
-    console.error(err);
-    document.getElementById('tableBody').innerHTML = `
-      <tr><td colspan="8">
-        <div class="state-box">
-          <div class="state-icon">⚠️</div>
-          <p>資料載入失敗，請確認試算表分享設定為「知道連結的人可以檢視」</p>
-        </div>
-      </td></tr>`;
+  // 跨區轉介
+  try {
+    const rows = await fetchSheet('02_跨區轉介紀錄');
+    allRefs = rows.filter(r => r[R.ID] && String(r[R.ID]).trim());
+    document.getElementById('refCount').textContent = allRefs.length;
+    renderRefsStats();
+    renderRefsTable();
+  } catch(e) {
+    document.getElementById('refsBody').innerHTML =
+      `<tr><td colspan="8"><div class="state-box"><div class="state-icon">⚠️</div><p>跨區轉介資料載入失敗，請確認分頁名稱為「02_跨區轉介紀錄」</p></div></td></tr>`;
   }
 }
 
-// ── 統計列 ────────────────────────────────────────
-function renderStats() {
-  const total   = allRows.length;
-  const waiting = allRows.filter(r => r[COL.STATUS] === '待聯繫').length;
-  const tracking= allRows.filter(r => r[COL.STATUS] === '持續追蹤').length;
-  const done    = allRows.filter(r => r[COL.STATUS] === '已結案').length;
-
+// ── 來電紀錄統計 ──────────────────────────────────
+function renderCallsStats() {
+  const t = allCalls.length;
+  const count = s => allCalls.filter(r => r[C.STATUS] === s).length;
   document.getElementById('statsBar').innerHTML = `
-    <div class="stat-pill">共 <strong>${total}</strong> 件</div>
-    <div class="stat-pill">待聯繫 <strong>${waiting}</strong></div>
-    <div class="stat-pill">持續追蹤 <strong>${tracking}</strong></div>
-    <div class="stat-pill">已結案 <strong>${done}</strong></div>
+    <div class="stat-pill">共 <strong>${t}</strong> 件</div>
+    <div class="stat-pill">待聯繫 <strong>${count('待聯繫')}</strong></div>
+    <div class="stat-pill">輔導中 <strong>${count('輔導中')}</strong></div>
+    <div class="stat-pill">已送件 <strong>${count('已送件')}</strong></div>
+    <div class="stat-pill">已核定 <strong>${count('已核定')}</strong></div>
+    <div class="stat-pill">已結案 <strong>${count('已結案')}</strong></div>
   `;
 }
 
-// ── 篩選 & 搜尋 ───────────────────────────────────
-function setFilter(val, btn) {
-  currentFilter = val;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTable();
+// ── 跨區轉介統計 ──────────────────────────────────
+function renderRefsStats() {
+  const t = allRefs.length;
+  // 依轉介中心統計
+  const centerMap = {};
+  allRefs.forEach(r => {
+    const c = String(r[R.CENTER] || '其他').trim();
+    centerMap[c] = (centerMap[c] || 0) + 1;
+  });
+  const pills = Object.entries(centerMap)
+    .sort((a,b) => b[1]-a[1])
+    .slice(0,4)
+    .map(([k,v]) => `<div class="stat-pill">${escHtml(k)} <strong>${v}</strong></div>`)
+    .join('');
+  document.getElementById('refStatsBar').innerHTML =
+    `<div class="stat-pill">共 <strong>${t}</strong> 件</div>${pills}`;
 }
 
-function renderTable() {
-  const keyword = document.getElementById('searchInput').value.toLowerCase();
+// ── 篩選 ──────────────────────────────────────────
+function setFilter(val, btn, tab) {
+  if (tab === 'calls') { callFilter = val; renderCallsTable(); }
+  else                 { refFilter  = val; renderRefsTable(); }
+  btn.closest('.filter-bar').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
 
-  const filtered = allRows.filter(r => {
-    const matchFilter = currentFilter === 'all' || r[COL.STATUS] === currentFilter;
-    const matchSearch = !keyword ||
-      String(r[COL.ID]).toLowerCase().includes(keyword) ||
-      String(r[COL.LOCATION]).toLowerCase().includes(keyword) ||
-      String(r[COL.CALLER]).toLowerCase().includes(keyword) ||
-      String(r[COL.UNIT]).toLowerCase().includes(keyword) ||
-      String(r[COL.STAFF]).toLowerCase().includes(keyword);
-    return matchFilter && matchSearch;
+// ── 來電紀錄表格 ──────────────────────────────────
+function renderCallsTable() {
+  const kw = document.getElementById('searchCalls').value.toLowerCase();
+  const VALID = ['待聯繫','已聯繫','輔導中','資源媒合中','提案規劃中','已送件','已核定','未成案','已結案'];
+
+  const rows = allCalls.filter(r => {
+    const ok = callFilter === 'all' || r[C.STATUS] === callFilter;
+    const km = !kw || [C.ID,C.LOCATION,C.CALLER,C.UNIT,C.STAFF].some(i => String(r[i]).toLowerCase().includes(kw));
+    return ok && km;
   });
 
-  if (!filtered.length) {
-    document.getElementById('tableBody').innerHTML = `
-      <tr><td colspan="8">
-        <div class="state-box">
-          <div class="state-icon">🔍</div>
-          <p>沒有符合條件的案件</p>
-        </div>
-      </td></tr>`;
+  if (!rows.length) {
+    document.getElementById('callsBody').innerHTML =
+      `<tr><td colspan="8"><div class="state-box"><div class="state-icon">🔍</div><p>沒有符合條件的案件</p></div></td></tr>`;
     return;
   }
 
-  const rows = filtered.map(r => {
-    const status = String(r[COL.STATUS] || '').trim();
-    const tagClass = ['待聯繫','持續追蹤','已結案'].includes(status)
-      ? `tag-${status}` : 'tag-default';
-
-    // 日期只取前10碼
-    const created  = String(r[COL.CREATED] || '').slice(0, 10);
-    const lastDate = String(r[COL.LAST_DATE] || '').slice(0, 10);
-
-    return `
-      <tr>
-        <td class="case-id">${escHtml(r[COL.ID])}</td>
-        <td>${escHtml(created)}</td>
-        <td><span class="location-badge">${escHtml(r[COL.LOCATION])}</span></td>
-        <td>
-          <div class="case-name">${escHtml(r[COL.CALLER])}</div>
-          <div class="case-sub">${escHtml(r[COL.UNIT])}</div>
-        </td>
-        <td>${escHtml(r[COL.STAFF])}</td>
-        <td class="col-tag"><span class="tag ${tagClass}">${escHtml(status) || '—'}</span></td>
-        <td class="col-diag">${escHtml(r[COL.TEACHER])}</td>
-        <td>${escHtml(lastDate) || '—'}</td>
-      </tr>`;
+  document.getElementById('callsBody').innerHTML = rows.map(r => {
+    const status = String(r[C.STATUS] || '').trim();
+    const tagCls = VALID.includes(status) ? `tag-${status}` : 'tag-default';
+    const created  = String(r[C.CREATED]  || '').slice(0,10);
+    const lastDate = String(r[C.LAST_DATE]|| '').slice(0,10);
+    return `<tr>
+      <td class="case-id">${escHtml(r[C.ID])}</td>
+      <td>${escHtml(created)}</td>
+      <td><span class="location-badge">${escHtml(r[C.LOCATION])}</span></td>
+      <td><div class="case-name">${escHtml(r[C.CALLER])}</div><div class="case-sub">${escHtml(r[C.UNIT])}</div></td>
+      <td>${escHtml(r[C.STAFF])}</td>
+      <td><span class="tag ${tagCls}">${escHtml(status)||'—'}</span></td>
+      <td class="col-hide">${escHtml(r[C.TEACHER])}</td>
+      <td class="col-hide">${escHtml(lastDate)||'—'}</td>
+    </tr>`;
   }).join('');
+}
 
-  document.getElementById('tableBody').innerHTML = rows;
+// ── 跨區轉介表格 ──────────────────────────────────
+function renderRefsTable() {
+  const kw = document.getElementById('searchRefs').value.toLowerCase();
+
+  const rows = allRefs.filter(r => {
+    return !kw || [R.ID,R.LOCATION,R.CALLER,R.UNIT,R.CENTER,R.STAFF].some(i => String(r[i]).toLowerCase().includes(kw));
+  });
+
+  if (!rows.length) {
+    document.getElementById('refsBody').innerHTML =
+      `<tr><td colspan="8"><div class="state-box"><div class="state-icon">🔍</div><p>沒有符合條件的轉介紀錄</p></div></td></tr>`;
+    return;
+  }
+
+  document.getElementById('refsBody').innerHTML = rows.map(r => {
+    const time = String(r[R.TIME] || '').slice(0,10);
+    return `<tr>
+      <td class="case-id">${escHtml(r[R.ID])}</td>
+      <td>${escHtml(time)}</td>
+      <td><span class="location-badge">${escHtml(r[R.LOCATION])}</span></td>
+      <td>${escHtml(r[R.AREA])}</td>
+      <td><span class="ref-badge">${escHtml(r[R.CENTER])}</span></td>
+      <td><div class="case-name">${escHtml(r[R.CALLER])}</div><div class="case-sub">${escHtml(r[R.UNIT])}</div></td>
+      <td class="col-hide">${escHtml(r[R.STAFF])}</td>
+      <td class="col-hide">${escHtml(r[R.NOTE])}</td>
+    </tr>`;
+  }).join('');
 }
 
 function escHtml(str) {
-  return String(str ?? '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── 啟動 ──────────────────────────────────────────
-loadData();
+loadAll();
 </script>
 </body>
 </html>
