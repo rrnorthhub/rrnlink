@@ -160,7 +160,7 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--sand); color: 
 <div class="toast" id="toast"></div>
 
 <script>
-const GAS_URL  = 'https://script.google.com/macros/s/AKfycbywmZoyoeZhplJWQ5l9vWPf2mS1Fu0W2rADpdXAcTxzbRmOI-a7-cgjmBPEeItI9UlE/exec';
+const GAS_URL  = '/api/diary';
 const SHEET_ID = '12zqi5Kl1aPgB1R6Kbo3nc5CPsBFpwvSxArGXF1Hu9oA';
 const COUNTIES = ['辦公室','基隆市','臺北市','新北市','桃園市','新竹縣','新竹市','金門縣','連江縣'];
 const WEEKDAYS = ['日','一','二','三','四','五','六'];
@@ -358,15 +358,18 @@ async function saveField(county) {
   setSaveStatus('saving');
 
   try {
-    await fetch(GAS_URL, {
+    const res = await fetch(GAS_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ date: selectedDate, county, content: val }),
     });
-    // no-cors 模式無法讀取回應，視為成功
-    setSaveStatus('saved');
-    renderWeekBar(getWeekDates(currentWeekOffset));
+    const json = await res.json();
+    if (json.ok) {
+      setSaveStatus('saved');
+      renderWeekBar(getWeekDates(currentWeekOffset));
+    } else {
+      throw new Error(json.error);
+    }
   } catch(e) {
     setSaveStatus('error');
     showToast('儲存失敗，請稍後再試', true);
