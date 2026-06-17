@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>輔導聯繫記錄｜北輔中心</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green:    #4e7566;
+  --green-lt: #eef3f0;
+  --green-dk: #3a5a4e;
+  --sand:     #f7f4ef;
+  --ink:      #1a1a18;
+  --muted:    #6b6760;
+  --border:   #e2ddd8;
+  --white:    #ffffff;
+  --radius:   10px;
+  --shadow:   0 1px 4px rgba(0,0,0,.08);
+}
+body { font-family: 'Noto Sans TC', sans-serif; background: var(--sand); color: var(--ink); min-height: 100vh; }
+.header { background: var(--white); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+.header-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.header-logo { width: 32px; height: 32px; border-radius: 8px; background: var(--green); color: #fff; font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+.header-title { font-size: 14px; font-weight: 700; }
+.header-sub { font-size: 11px; color: var(--muted); }
+.back-btn { font-size: 13px; color: var(--green); font-weight: 500; text-decoration: none; padding: 6px 14px; border: 1px solid var(--green); border-radius: 6px; }
+.back-btn:hover { background: var(--green-lt); }
+.page { max-width: 1100px; margin: 0 auto; padding: 24px 24px 64px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.section-title { font-size: 13px; font-weight: 700; color: var(--green-dk); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.section-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background: var(--green); border-radius: 2px; }
+.form-panel { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.form-tip { font-size: 12px; color: var(--muted); padding: 10px 16px; background: var(--sand); border-bottom: 1px solid var(--border); }
+iframe { width: 100%; height: 780px; border: none; display: block; }
+.report-panel { display: flex; flex-direction: column; gap: 16px; }
+.controls { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px 20px; }
+.control-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.control-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 120px; }
+.control-group label { font-size: 12px; color: var(--muted); }
+.control-group select { font-family: inherit; font-size: 13px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--white); color: var(--ink); cursor: pointer; }
+.run-btn { padding: 8px 20px; background: var(--green); color: #fff; border: none; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background .15s; }
+.run-btn:hover { background: var(--green-dk); }
+.run-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+.progress-wrap { display: none; background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; }
+.progress-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+.progress-bar-outer { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.progress-bar-inner { height: 100%; background: var(--green); border-radius: 3px; transition: width .4s; width: 0%; }
+.progress-county { font-size: 12px; color: var(--green); margin-top: 6px; }
+.results-wrap { display: none; }
+.copy-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.copy-btn { padding: 6px 16px; border: 1px solid var(--green); color: var(--green); background: var(--white); border-radius: 6px; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.copy-btn:hover { background: var(--green-lt); }
+.result-month { font-size: 12px; color: var(--muted); }
+.county-block { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden; }
+.county-header { padding: 12px 16px; background: var(--green-lt); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.county-name { font-size: 14px; font-weight: 900; color: var(--green-dk); }
+.county-count { font-size: 12px; color: var(--muted); }
+.team-row { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.team-row:last-child { border-bottom: none; }
+.team-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.team-id { font-size: 11px; color: var(--muted); font-weight: 700; }
+.team-name { font-size: 13px; font-weight: 700; flex: 1; }
+.stage-badge { font-size: 11px; padding: 2px 8px; border-radius: 12px; white-space: nowrap; }
+.stage-1 { background: #fce8d5; color: #8c4a00; }
+.stage-2 { background: #fff3cd; color: #7d5a00; }
+.stage-3 { background: var(--green-lt); color: var(--green-dk); }
+.stage-4 { background: #d4edda; color: #1a5c2e; }
+.stage-5 { background: #cce5ff; color: #004085; }
+.stage-6 { background: #f8d7da; color: #721c24; }
+.team-summary { font-size: 12px; color: var(--ink); line-height: 1.8; padding-left: 4px; }
+.team-no-data { font-size: 12px; color: var(--muted); font-style: italic; }
+.team-loading { font-size: 12px; color: var(--green); display: flex; align-items: center; gap: 6px; }
+.dot-spin { display: inline-block; width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--green); border-top-color: transparent; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: #fff; padding: 10px 22px; border-radius: 8px; font-size: 13px; opacity: 0; transition: all .3s; z-index: 999; white-space: nowrap; pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+@media (max-width: 800px) {
+  .page { grid-template-columns: 1fr; }
+  iframe { height: 600px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <a href="/#internal" class="header-brand">
+      <div class="header-logo">北</div>
+      <div>
+        <div class="header-title">地方創生北區輔導中心</div>
+        <div class="header-sub">輔導聯繫記錄</div>
+      </div>
+    </a>
+    <a href="/#internal" class="back-btn">← 返回儀表板</a>
+  </div>
+</header>
+
+<div class="page">
+
+  <div>
+    <div class="section-title">填寫聯繫紀錄</div>
+    <div class="form-panel">
+      <div class="form-tip">每次與團隊聯繫後填寫，約 2 分鐘，填寫後資料自動寫入追蹤試算表</div>
+      <iframe
+        src="https://docs.google.com/forms/d/e/1FAIpQLSdT4aELZl91ZQOdNl9L-wosHNcP5GPhgDkHS06Ti3NKvIIHqQ/viewform?embedded=true"
+        title="北區輔導中心｜輔導聯繫記錄"
+      >載入中…</iframe>
+    </div>
+  </div>
+
+  <div>
+    <div class="section-title">月份聯繫綜整（AI 摘要）</div>
+    <div class="report-panel">
+
+      <div class="controls">
+        <div class="control-row">
+          <div class="control-group">
+            <label>選擇月份</label>
+            <select id="monthSelect"></select>
+          </div>
+          <button class="run-btn" id="runBtn" onclick="runReport()">產出本月綜整</button>
+        </div>
+      </div>
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-label" id="progressLabel">準備中…</div>
+        <div class="progress-bar-outer">
+          <div class="progress-bar-inner" id="progressBar"></div>
+        </div>
+        <div class="progress-county" id="progressCounty"></div>
+      </div>
+
+      <div class="results-wrap" id="resultsWrap">
+        <div class="copy-bar">
+          <div class="result-month" id="resultMonth"></div>
+          <button class="copy-btn" onclick="copyReport()">複製月報文字</button>
+        </div>
+        <div id="resultBlocks"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwcc-aZky8noEqWkw8Me7y6CxeRKbf54xfXHz8bjkEwAO39iUgydrpXEuAixPdGe80_sw/exec';
+const COUNTIES = ['臺北市','基隆市','新北市','桃園市','新竹縣','新竹市','金門縣','連江縣'];
+const STAGE_CLASS = {
+  '團隊撰寫中':    'stage-1',
+  '計畫修正':      'stage-2',
+  '中心輔導聯繫中': 'stage-3',
+  '第一次函送':    'stage-4',
+  '第二次函送':    'stage-5',
+  '取消提案':      'stage-6',
+};
+
+function initMonthSelect() {
+  const sel = document.getElementById('monthSelect');
+  const now = new Date();
+  for (var i = 0; i < 6; i++) {
+    var d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    var val = d.getFullYear() + '/' + String(d.getMonth()+1).padStart(2,'0');
+    var label = (d.getFullYear() - 1911) + '年' + (d.getMonth()+1) + '月';
+    var opt = document.createElement('option');
+    opt.value = val;
+    opt.textContent = label;
+    sel.appendChild(opt);
+  }
+}
+
+async function runReport() {
+  var month = document.getElementById('monthSelect').value;
+  var btn = document.getElementById('runBtn');
+  btn.disabled = true;
+
+  document.getElementById('resultBlocks').innerHTML = '';
+  document.getElementById('resultsWrap').style.display = 'none';
+  document.getElementById('progressWrap').style.display = 'block';
+
+  var total = COUNTIES.length;
+
+  for (var i = 0; i < COUNTIES.length; i++) {
+    var county = COUNTIES[i];
+    var pct = Math.round((i / total) * 100);
+    document.getElementById('progressLabel').textContent = '處理中… ' + (i+1) + ' / ' + total + ' 個縣市';
+    document.getElementById('progressBar').style.width = pct + '%';
+    document.getElementById('progressCounty').textContent = '正在讀取：' + county;
+
+    try {
+      var url = GAS_URL + '?action=read&county=' + encodeURIComponent(county) + '&month=' + encodeURIComponent(month);
+      var res  = await fetch(url);
+      var json = await res.json();
+      if (!json.ok) throw new Error(json.error);
+
+      var teams = json.data.teams || [];
+      renderCountyBlock(county, teams, true, {});
+
+      var teamsWithData = teams.filter(function(t) { return t.hasData; });
+
+      if (teamsWithData.length > 0) {
+        document.getElementById('progressCounty').textContent = 'AI 摘要：' + county + '（' + teamsWithData.length + ' 個團隊）';
+        var summaries = await aiSummarize(county, month, teamsWithData);
+        renderCountyBlock(county, teams, false, summaries);
+      } else {
+        renderCountyBlock(county, teams, false, {});
+      }
+
+    } catch(err) {
+      console.error(county, err);
+      renderCountyError(county, err.message);
+    }
+  }
+
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('progressLabel').textContent = '全部完成！';
+  document.getElementById('progressCounty').textContent = '';
+
+  var rocYear = parseInt(month.split('/')[0]) - 1911;
+  var m = parseInt(month.split('/')[1]);
+  document.getElementById('resultMonth').textContent = '民國 ' + rocYear + ' 年 ' + m + ' 月 輔導聯繫綜整';
+  document.getElementById('resultsWrap').style.display = 'block';
+  btn.disabled = false;
+}
+
+async function aiSummarize(county, month, teams) {
+  var rocYear = parseInt(month.split('/')[0]) - 1911;
+  var m = parseInt(month.split('/')[1]);
+  var teamText = teams.map(function(t) {
+    return '[' + t.id + '] ' + t.name + '（' + t.stage + '）\n' + t.records.join('\n');
+  }).join('\n\n');
+
+  var prompt = '以下是民國' + rocYear + '年' + m + '月，' + county + '各提案團隊的輔導聯繫紀錄。\n'
+    + '請針對每個團隊，以繁體中文寫出1-2行的當月重點摘要。\n'
+    + '輸出格式（每個團隊一行）：團隊編號: 摘要文字\n\n'
+    + teamText;
+
+  var res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  var data = await res.json();
+  var text = (data.content || []).map(function(c) { return c.text || ''; }).join('');
+  var summaries = {};
+  text.split('\n').forEach(function(line) {
+    var match = line.match(/^([A-Z]\d{2}-\d+)[：:]\s*(.+)/);
+    if (match) summaries[match[1]] = match[2].trim();
+  });
+  return summaries;
+}
+
+function renderCountyBlock(county, teams, loading, summaries) {
+  var id = 'block-' + county;
+  var el = document.getElementById(id);
+  if (!el) {
+    el = document.createElement('div');
+    el.id = id;
+    el.className = 'county-block';
+    document.getElementById('resultBlocks').appendChild(el);
+  }
+
+  var withData = teams.filter(function(t) { return t.hasData; }).length;
+  var html = '<div class="county-header">'
+    + '<span class="county-name">■ ' + county + '</span>'
+    + '<span class="county-count">' + withData + ' / ' + teams.length + ' 個團隊有本月紀錄</span>'
+    + '</div>';
+
+  teams.forEach(function(t) {
+    var sc = STAGE_CLASS[t.stage] || 'stage-1';
+    html += '<div class="team-row">'
+      + '<div class="team-header">'
+      + '<span class="team-id">' + t.id + '</span>'
+      + '<span class="team-name">' + t.name + '</span>'
+      + (t.stage ? '<span class="stage-badge ' + sc + '">' + t.stage + '</span>' : '')
+      + '</div>';
+
+    if (loading && t.hasData) {
+      html += '<div class="team-loading"><span class="dot-spin"></span>AI 摘要中…</div>';
+    } else if (summaries[t.id]) {
+      html += '<div class="team-summary">' + escHtml(summaries[t.id]) + '</div>';
+    } else if (t.hasData) {
+      html += '<div class="team-summary">' + escHtml(t.records.join(' ')) + '</div>';
+    } else {
+      html += '<div class="team-no-data">本月無聯繫紀錄</div>';
+    }
+    html += '</div>';
+  });
+
+  el.innerHTML = html;
+}
+
+function renderCountyError(county, msg) {
+  var id = 'block-' + county;
+  var el = document.getElementById(id) || document.createElement('div');
+  el.id = id;
+  el.className = 'county-block';
+  el.innerHTML = '<div class="county-header"><span class="county-name">■ ' + county + '</span></div>'
+    + '<div class="team-row"><span class="team-no-data">讀取失敗：' + msg + '</span></div>';
+  if (!document.getElementById(id)) document.getElementById('resultBlocks').appendChild(el);
+}
+
+function copyReport() {
+  var month = document.getElementById('monthSelect').value;
+  var rocYear = parseInt(month.split('/')[0]) - 1911;
+  var m = parseInt(month.split('/')[1]);
+  var text = '【民國' + rocYear + '年' + m + '月 輔導聯繫月報】\n\n';
+
+  COUNTIES.forEach(function(county) {
+    var block = document.getElementById('block-' + county);
+    if (!block) return;
+    text += '■ ' + county + '\n';
+    var rows = block.querySelectorAll('.team-row');
+    rows.forEach(function(row) {
+      if (row.querySelector('.team-no-data')) return;
+      var id = (row.querySelector('.team-id') || {}).textContent || '';
+      var name = (row.querySelector('.team-name') || {}).textContent || '';
+      var stage = (row.querySelector('.stage-badge') || {}).textContent || '';
+      var summary = (row.querySelector('.team-summary') || {}).textContent || '';
+      text += id + ' ' + name;
+      if (stage) text += '｜' + stage;
+      text += '\n';
+      if (summary) text += summary + '\n';
+      text += '\n';
+    });
+    text += '\n';
+  });
+
+  navigator.clipboard.writeText(text.trim()).then(function() {
+    showToast('月報文字已複製！');
+  }).catch(function() {
+    showToast('複製失敗，請手動選取文字');
+  });
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
+
+initMonthSelect();
+</script>
+</body>
+</html>
