@@ -7,6 +7,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async></script>
+  <style>
+    /* Google 登入頁 */
+    .google-login-wrap { min-height: calc(100vh - 60px); display: flex; align-items: center; justify-content: center; background: var(--sand, #f7f4ef); }
+    .google-login-card { background: #fff; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,.10); padding: 48px 40px 40px; max-width: 400px; width: 100%; text-align: center; }
+    .google-login-logo { width: 56px; height: 56px; border-radius: 14px; background: #4e7566; color: #fff; font-size: 26px; font-weight: 900; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .google-login-title { font-size: 20px; font-weight: 900; margin-bottom: 6px; }
+    .google-login-sub { font-size: 13px; color: #6b6760; margin-bottom: 32px; }
+    .google-login-btn-wrap { display: flex; justify-content: center; margin-bottom: 16px; }
+    .google-login-error { font-size: 12px; color: #b05c5c; margin-top: 12px; display: none; padding: 8px 12px; background: #fdf0f0; border-radius: 6px; }
+    .google-login-hint { font-size: 11px; color: #a89f96; margin-top: 20px; }
+  </style>
 </head>
 <body>
 
@@ -32,7 +45,6 @@
   ══════════════════════════════════ -->
   <main id="view-public" class="view active">
 
-    <!-- Hero -->
     <section class="hero">
       <div class="hero-inner">
         <p class="hero-eyebrow">115年度 · 地方創生北區輔導中心</p>
@@ -46,8 +58,6 @@
     </section>
 
     <div class="container">
-
-      <!-- 服務入口 -->
       <section class="section">
         <h2 class="section-title">服務入口</h2>
         <div class="grid-4">
@@ -76,7 +86,6 @@
 
       <div class="divider"></div>
 
-      <!-- 最新公告 -->
       <section class="section">
         <div class="section-header">
           <h2 class="section-title">最新公告</h2>
@@ -114,7 +123,6 @@
 
       <div class="divider"></div>
 
-      <!-- 輔導流程 -->
       <section class="section" id="process">
         <h2 class="section-title">輔導流程</h2>
         <div class="process-steps">
@@ -152,7 +160,6 @@
 
       <div class="divider"></div>
 
-      <!-- 活動報名 -->
       <section class="section" id="register">
         <h2 class="section-title">活動報名</h2>
         <div class="form-placeholder">
@@ -168,7 +175,6 @@
 
       <div class="divider"></div>
 
-      <!-- 文件下載 -->
       <section class="section" id="download">
         <h2 class="section-title">文件下載</h2>
         <div class="download-grid">
@@ -213,7 +219,6 @@
 
       <div class="divider"></div>
 
-      <!-- 聯絡窗口 -->
       <section class="section" id="contact">
         <h2 class="section-title">聯絡窗口</h2>
         <div class="contact-card">
@@ -246,22 +251,35 @@
           </div>
         </div>
       </section>
-
     </div>
   </main>
 
   <!-- ══════════════════════════════════
-       登入頁
+       Google 登入頁
   ══════════════════════════════════ -->
-  <main id="view-login" class="view">
-    <div class="login-wrap">
-      <div class="login-card">
-        <div class="login-logo">北</div>
-        <h2 class="login-title">內部工作區</h2>
-        <p class="login-sub">請輸入密碼進入</p>
-        <input type="password" id="pwd-input" class="login-input" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')checkPwd()" />
-        <button class="btn-primary login-btn" onclick="checkPwd()">進入</button>
-        <p id="pwd-error" class="login-error" style="display:none">密碼錯誤，請再試一次</p>
+  <main id="view-google-login" class="view">
+    <div class="google-login-wrap">
+      <div class="google-login-card">
+        <div class="google-login-logo">北</div>
+        <h2 class="google-login-title">內部工作區</h2>
+        <p class="google-login-sub">請使用北輔中心授權的 Google 帳號登入</p>
+        <div class="google-login-btn-wrap">
+          <div id="g_id_onload"
+            data-client_id="480177769070-t922jh5s6svflimji6ehk0jvr5omfgf6.apps.googleusercontent.com"
+            data-callback="handleGoogleLogin"
+            data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin"
+            data-type="standard"
+            data-size="large"
+            data-theme="outline"
+            data-text="sign_in_with"
+            data-shape="rectangular"
+            data-logo_alignment="left">
+          </div>
+        </div>
+        <div id="google-login-error" class="google-login-error"></div>
+        <p class="google-login-hint">僅限北輔中心授權帳號使用<br/>如有問題請聯繫 rrnorthhub@gmail.com</p>
       </div>
     </div>
   </main>
@@ -276,11 +294,11 @@
         <div>
           <p class="eyebrow">內部工作區</p>
           <h2 class="internal-title">北輔中心工作儀表板</h2>
+          <p style="font-size:12px;color:#6b6760;margin-top:4px">登入帳號：<span id="logged-email"></span></p>
         </div>
         <button class="btn-ghost-sm" onclick="logout()">登出</button>
       </div>
 
-      <!-- 快速入口 -->
       <div class="grid-3" style="margin-bottom:32px">
         <a href="gantt.html" class="internal-card">
           <div class="internal-icon">程</div>
@@ -334,7 +352,6 @@
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="footer">
     <div class="container">
       <p>© 2026 地方創生北區輔導中心 · 115年度計畫</p>
