@@ -108,10 +108,25 @@ function logout() {
 
 // ── Google 登入回呼 ───────────────────────────────
 
+function parseJwt(token) {
+  // URL-safe base64 解碼（Google JWT 用 - 和 _ 代替 + 和 /）
+  var base64 = token.split('.')[1]
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+  // 補齊 padding
+  while (base64.length % 4) base64 += '=';
+  var json = decodeURIComponent(
+    atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join('')
+  );
+  return JSON.parse(json);
+}
+
 function handleGoogleLogin(response) {
   // 解析 JWT token
   var token = response.credential;
-  var payload = JSON.parse(atob(token.split('.')[1]));
+  var payload = parseJwt(token);
   var email = (payload.email || '').toLowerCase();
 
   if (ALLOWED_EMAILS.indexOf(email) !== -1) {
