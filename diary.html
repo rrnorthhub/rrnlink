@@ -160,15 +160,16 @@ body { font-family: 'Noto Sans TC', sans-serif; background: var(--sand); color: 
 <div class="toast" id="toast"></div>
 
 <script>
-const GAS_URL  = '/api/diary';
-const SHEET_ID = '12zqi5Kl1aPgB1R6Kbo3nc5CPsBFpwvSxArGXF1Hu9oA';
+// ── 設定 ──────────────────────────────────────────
+// 直接呼叫 Apps Script，不透過 Vercel Function
+const GAS_URL  = 'https://script.google.com/macros/s/AKfycbywmZoyoeZhplJWQ5l9vWPf2mS1Fu0W2rADpdXAcTxzbRmOI-a7-cgjmBPEeItI9UlE/exec';
 const COUNTIES = ['辦公室','基隆市','臺北市','新北市','桃園市','新竹縣','新竹市','金門縣','連江縣'];
 const WEEKDAYS = ['日','一','二','三','四','五','六'];
 
-let currentWeekOffset = 0; // 0 = 本週
-let selectedDate = '';      // MM-DD
-let weekData = {};          // { 'MM-DD': { 辦公室:'...', 基隆市:'...' } }
-let saveTimers = {};        // debounce timers
+let currentWeekOffset = 0;
+let selectedDate = '';
+let weekData = {};
+let saveTimers = {};
 
 // ── 週計算 ────────────────────────────────────────
 function getWeekDates(offset) {
@@ -191,7 +192,7 @@ function todayMMDD() {
   return toMMDD(new Date());
 }
 
-// ── 載入週資料 ────────────────────────────────────
+// ── 載入週資料（改呼叫 Apps Script）────────────────
 async function loadWeek() {
   const dates = getWeekDates(currentWeekOffset);
   const dateStrs = dates.map(toMMDD);
@@ -201,36 +202,23 @@ async function loadWeek() {
   document.getElementById('weekTitle').innerHTML =
     `${mon.getFullYear()} 年 <span>${mon.getMonth()+1}/${mon.getDate()} – ${sun.getMonth()+1}/${sun.getDate()}</span>`;
 
-  // 先清空畫面
   weekData = {};
   renderWeekBar(dates);
 
-  // 讀取 Sheets 資料
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+    // 用 GET 參數帶日期清單，Apps Script 回傳 JSON
+    const url = `${GAS_URL}?action=read&dates=${dateStrs.join(',')}`;
     const res  = await fetch(url);
-    const text = await res.text();
-    const json = JSON.parse(text.replace(/^[^\(]+\(/, '').replace(/\);?\s*$/, ''));
-    const rows = json.table.rows.map(r => r.c.map(c => c ? String(c.f || c.v || '').trim() : ''));
+    const json = await res.json();
 
-    rows.forEach(r => {
-      const d = String(r[0]).trim();
-      if (dateStrs.includes(d)) {
-        weekData[d] = {
-          '辦公室': r[1] || '',
-          '基隆市': r[2] || '',
-          '臺北市': r[3] || '',
-          '新北市': r[4] || '',
-          '桃園市': r[5] || '',
-          '新竹縣': r[6] || '',
-          '新竹市': r[7] || '',
-          '金門縣': r[8] || '',
-          '連江縣': r[9] || '',
-        };
-      }
-    });
+    if (json.ok && json.data) {
+      Object.entries(json.data).forEach(([date, row]) => {
+        if (row) weekData[date] = row;
+      });
+    }
   } catch(e) {
     console.error('載入失敗', e);
+    showToast('資料載入失敗，請重新整理', true);
   }
 
   renderWeekBar(dates);
@@ -266,16 +254,13 @@ function selectDay(mmdd, dateObj, timestamp) {
   selectedDate = mmdd;
   if (!dateObj && timestamp) dateObj = new Date(timestamp);
 
-  // 更新 bar active 狀態
   const dates = getWeekDates(currentWeekOffset);
   renderWeekBar(dates);
 
-  // 更新編輯器標題
   document.getElementById('editorDate').textContent = `2026 / ${mmdd.replace('-','/')}`;
   document.getElementById('editorWeekday').textContent = dateObj ? `週${WEEKDAYS[dateObj.getDay()]}` : '';
   setSaveStatus('idle');
 
-  // 渲染縣市欄位
   renderEditor(mmdd);
 }
 
@@ -284,7 +269,6 @@ function renderEditor(mmdd) {
   const data = weekData[mmdd] || {};
   let html = '';
 
-  // 辦公室（固定展開）
   html += `<div class="office-row">
     <div class="office-toggle">
       <div class="office-dot"></div>
@@ -297,7 +281,6 @@ function renderEditor(mmdd) {
     >${escHtml(data['辦公室'] || '')}</textarea>
   </div>`;
 
-  // 各縣市
   COUNTIES.slice(1).forEach(county => {
     const val = data[county] || '';
     const hasContent = val.trim().length > 0;
@@ -332,47 +315,47 @@ function toggleCounty(county) {
 function onInput(county) {
   const val = document.getElementById('ta-' + county).value;
 
-  // 更新預覽
   const preview = document.getElementById('preview-' + county);
   if (preview) preview.textContent = val.split('\n')[0] || '';
 
-  // 更新 has-content
   const row = document.getElementById('row-' + county);
   if (row) row.classList.toggle('has-content', val.trim().length > 0);
 
-  // debounce 3秒後自動儲存
   clearTimeout(saveTimers[county]);
   setSaveStatus('pending');
   saveTimers[county] = setTimeout(() => saveField(county), 3000);
 }
 
-// ── 儲存單一欄位 ──────────────────────────────────
+// ── 儲存單一欄位（改用 GET 請求）────────────────────
 async function saveField(county) {
   clearTimeout(saveTimers[county]);
   const val = document.getElementById('ta-' + county)?.value ?? '';
 
-  // 更新本地快取
   if (!weekData[selectedDate]) weekData[selectedDate] = {};
   weekData[selectedDate][county] = val;
 
   setSaveStatus('saving');
 
   try {
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ date: selectedDate, county, content: val }),
-    });
+    // Apps Script 只接受 GET，所有參數放 query string
+    // content 需要 encodeURIComponent 處理中文和換行
+    const url = `${GAS_URL}?action=write`
+      + `&date=${encodeURIComponent(selectedDate)}`
+      + `&county=${encodeURIComponent(county)}`
+      + `&content=${encodeURIComponent(val)}`;
+
+    const res  = await fetch(url);
     const json = await res.json();
+
     if (json.ok) {
       setSaveStatus('saved');
       renderWeekBar(getWeekDates(currentWeekOffset));
     } else {
-      throw new Error(json.error);
+      throw new Error(json.error || '未知錯誤');
     }
   } catch(e) {
     setSaveStatus('error');
-    showToast('儲存失敗，請稍後再試', true);
+    showToast('儲存失敗：' + e.message, true);
     console.error(e);
   }
 }
@@ -382,16 +365,16 @@ function setSaveStatus(state) {
   const dot  = document.getElementById('saveDot');
   const text = document.getElementById('saveText');
   dot.className = 'save-dot';
-  if (state === 'saving')  { dot.classList.add('saving'); text.textContent = '儲存中…'; }
-  else if (state === 'saved') { dot.classList.add('saved'); text.textContent = '已儲存'; }
-  else if (state === 'error') { dot.classList.add('error'); text.textContent = '儲存失敗'; }
+  if (state === 'saving')   { dot.classList.add('saving'); text.textContent = '儲存中…'; }
+  else if (state === 'saved')   { dot.classList.add('saved');  text.textContent = '已儲存'; }
+  else if (state === 'error')   { dot.classList.add('error');  text.textContent = '儲存失敗'; }
   else if (state === 'pending') { text.textContent = '有未儲存的內容'; }
   else { text.textContent = '—'; }
 }
 
 // ── 週切換 ────────────────────────────────────────
 function changeWeek(delta) { currentWeekOffset += delta; loadWeek(); }
-function goThisWeek() { currentWeekOffset = 0; loadWeek(); }
+function goThisWeek()      { currentWeekOffset = 0;     loadWeek(); }
 
 // ── 工具 ──────────────────────────────────────────
 function escHtml(str) {
