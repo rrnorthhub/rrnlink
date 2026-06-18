@@ -120,14 +120,16 @@
     display:inline-flex;align-items:center;justify-content:center;font-size:12px;
   }
 
-  /* 基本資料 grid */
+  /* 基本資料 grid - 固定3欄整齊 */
   .info-grid{
-    display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    display:grid;grid-template-columns:repeat(3,1fr);
     gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;
   }
-  .info-cell{background:#fbfcfa;padding:10px 14px}
-  .info-cell .k{font-size:11.5px;color:var(--ink-soft);margin-bottom:2px}
-  .info-cell .v{font-size:13.5px;color:var(--ink);word-break:break-all}
+  .info-cell{background:#fbfcfa;padding:11px 15px;min-width:0}
+  .info-cell.span2{grid-column:span 2}
+  .info-cell.span3{grid-column:span 3}
+  .info-cell .k{font-size:11.5px;color:var(--ink-soft);margin-bottom:3px}
+  .info-cell .v{font-size:13.5px;color:var(--ink);word-break:break-word;line-height:1.5}
   .info-cell .v.empty{color:#c3c9c1}
 
   .resync-row{margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
@@ -157,8 +159,18 @@
   .step.done:not(:last-child)::after{background:var(--green)}
 
   /* 填寫表單 */
-  .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
-  .form-field{display:flex;flex-direction:column;gap:5px}
+  .form-group{margin-bottom:20px}
+  .form-group:last-child{margin-bottom:0}
+  .group-label{
+    font-size:12px;font-weight:700;color:var(--ink-soft);letter-spacing:.5px;
+    padding-bottom:8px;margin-bottom:12px;border-bottom:1px dashed var(--line);
+    display:flex;align-items:center;gap:7px;
+  }
+  .group-label .tip{font-size:11px;font-weight:400;color:#b3bab1}
+  .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:13px 16px}
+  .form-grid.cols3{grid-template-columns:repeat(3,1fr)}
+  .form-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+  .form-field.full{grid-column:1/-1}
   .form-field label{font-size:12.5px;color:var(--ink-soft);font-weight:600}
   .form-field .locked-tag{font-size:10.5px;color:var(--amber);font-weight:600;margin-left:4px}
   .form-field input:disabled,.form-field select:disabled{background:#f3f4f1;color:#8a8f87}
@@ -192,6 +204,10 @@
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   #toast.err{background:var(--red)}
 
+  @media(max-width:760px){
+    .info-grid{grid-template-columns:repeat(2,1fr)}
+    .info-cell.span3{grid-column:span 2}
+  }
   @media(max-width:640px){
     header{padding:14px 16px}
     .brand h1{font-size:15px}.brand p{font-size:11px}
@@ -199,6 +215,12 @@
     .page-title{font-size:24px}
     .filter-bar{flex-direction:column;align-items:stretch}
     .field{min-width:0}
+    .info-grid{grid-template-columns:1fr}
+    .info-cell.span2,.info-cell.span3{grid-column:span 1}
+    .form-grid{grid-template-columns:1fr}
+    .form-field:empty{display:none}
+    .progress{gap:4px}
+    .step{min-width:70px}
   }
 </style>
 </head>
@@ -383,17 +405,22 @@ function bodyHTML(r){
 
 // 區1 基本資料
 function infoSection(r){
+  // [標籤, 值, 跨欄數(預設1)]
   const cells = [
     ['年度', r.year],['類別', r.category],['青培站提案', r.isYouth],
-    ['子計畫編號', r.subId],['執行地點', r.location],['主計畫名稱', r.mainPlan],
-    ['子計畫', r.subPlan],['部會', r.ministry],['部會項目', r.ministryItem],
-    ['年期', r.years],['主持人', r.pi],['聯絡人', r.contact],
-    ['聯絡電話', r.phone],['聯絡信箱', r.email],['是否收受電子公文', r.eDoc],
-    ['工作會議', r.meeting],['工作會議次別', r.meetingNo],
+    ['子計畫編號', r.subId],['年期', r.years],['執行地點', r.location],
+    ['主計畫名稱', r.mainPlan, 3],
+    ['子計畫', r.subPlan, 2],['部會', r.ministry],
+    ['部會項目', r.ministryItem, 3],
+    ['主持人', r.pi],['聯絡人', r.contact],['聯絡電話', r.phone],
+    ['聯絡信箱', r.email, 2],['是否收受電子公文', r.eDoc],
+    ['工作會議', r.meeting],['工作會議次別', r.meetingNo],['', '']
   ];
-  const grid = cells.map(([k,v]) =>
-    `<div class="info-cell"><div class="k">${k}</div><div class="v ${v?'':'empty'}">${v?esc(v):'—'}</div></div>`
-  ).join('');
+  const grid = cells.map(([k,v,span]) => {
+    if(!k) return '<div class="info-cell"></div>';
+    const sp = span===3?'span3':(span===2?'span2':'');
+    return `<div class="info-cell ${sp}"><div class="k">${k}</div><div class="v ${v?'':'empty'}">${v?esc(v):'—'}</div></div>`;
+  }).join('');
   return `
   <div class="section">
     <div class="section-title"><span class="num">1</span>基本資料（自動帶入）</div>
@@ -446,28 +473,48 @@ function formSection(r){
     return `<div class="form-field"><label>${label}</label>
       <select data-field="${key}">${opts}</select></div>`;
   };
-  const txt = (key,label,val,ph='') => `<div class="form-field"><label>${label}</label>
+  const txt = (key,label,val,ph='',full=false) => `<div class="form-field ${full?'full':''}"><label>${label}</label>
     <input type="text" data-field="${key}" value="${val?esc(val):''}" placeholder="${ph}"></div>`;
 
   return `
   <div class="section">
     <div class="section-title"><span class="num">3</span>填寫更新</div>
-    <div class="form-grid">
-      ${onceField('sysId','系統編號', r.sysId)}
-      ${onceField('isLocal','是否為地創計畫', r.isLocal, 'select')}
-      ${onceField('budget','實際核撥經費', r.budget)}
-      ${onceField('youthName','青培站公司名稱', r.youthName)}
-      ${txt('execYear','執行年度', r.execYear, '例：115')}
-      ${sel('reviewStat','細部計畫審查', r.reviewStat)}
-      ${txt('reviewDate','細部計畫審查日期', r.reviewDate, '2026/05/15')}
-      ${sel('reviseStat','細部計畫修正', r.reviseStat)}
-      ${sel('approveStat','細部計畫核定', r.approveStat)}
-      ${txt('approveDate','細部計畫核定日期', r.approveDate, '2026/05/15')}
-      ${sel('execProg','執行進度', r.execProg)}
-      ${sel('settlement','提送核銷', r.settlement)}
-      ${sel('payment','撥付款項', r.payment)}
-      ${txt('note','輔導備註（特殊狀況）', '', '填寫後會記錄到執行狀況')}
+
+    <div class="form-group">
+      <div class="group-label">一次性資料 <span class="tip">填寫並儲存後即鎖定，不可再修改</span></div>
+      <div class="form-grid">
+        ${onceField('sysId','系統編號', r.sysId)}
+        ${onceField('isLocal','是否為地創計畫', r.isLocal, 'select')}
+        ${onceField('budget','實際核撥經費', r.budget)}
+        ${onceField('youthName','青培站公司名稱', r.youthName)}
+      </div>
     </div>
+
+    <div class="form-group">
+      <div class="group-label">進度更新</div>
+      <div class="form-grid">
+        ${txt('execYear','執行年度', r.execYear, '例：115')}
+        <div class="form-field"></div>
+        ${sel('reviewStat','細部計畫審查', r.reviewStat)}
+        ${txt('reviewDate','細部計畫審查日期', r.reviewDate, '2026/05/15')}
+        ${sel('reviseStat','細部計畫修正', r.reviseStat)}
+        <div class="form-field"></div>
+        ${sel('approveStat','細部計畫核定', r.approveStat)}
+        ${txt('approveDate','細部計畫核定日期', r.approveDate, '2026/05/15')}
+        ${sel('execProg','執行進度', r.execProg)}
+        <div class="form-field"></div>
+        ${sel('settlement','提送核銷', r.settlement)}
+        ${sel('payment','撥付款項', r.payment)}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="group-label">輔導備註</div>
+      <div class="form-grid">
+        ${txt('note','特殊狀況說明', '', '填寫後會記錄到執行狀況，可留空', true)}
+      </div>
+    </div>
+
     <div class="form-actions">
       <button class="btn-save" onclick="saveRow(${r.rowIndex})">儲存更新</button>
       <span class="save-msg" id="msg-${r.rowIndex}"></span>
