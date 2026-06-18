@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>過案追蹤 ｜ 地方創生北區輔導中心</title>
+<style>
+  :root{
+    --green:#5c7a5c;          /* 主墨綠 */
+    --green-dark:#3f5840;
+    --green-soft:#e8efe7;     /* 淺綠方塊 */
+    --green-line:#d4e0d2;
+    --bg:#f4f5f2;
+    --card:#ffffff;
+    --ink:#2b322b;
+    --ink-soft:#7c857b;
+    --line:#e4e7e1;
+    --amber:#c98a2b;
+    --amber-soft:#fbeed4;
+    --red:#b5503f;
+    --blue-grey:#6b7d8a;
+    --radius:14px;
+    --shadow:0 1px 3px rgba(40,50,40,.06),0 4px 16px rgba(40,50,40,.04);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Microsoft JhengHei","PingFang TC","Noto Sans TC",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ── 頂部 ── */
+  header{
+    background:#fbfcfa;border-bottom:1px solid var(--line);
+    padding:18px 28px;display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:0;z-index:50;
+  }
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand .logo{
+    width:46px;height:46px;border-radius:11px;background:var(--green);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    font-size:20px;font-weight:700;letter-spacing:1px;
+  }
+  .brand h1{font-size:17px;font-weight:700;color:var(--ink)}
+  .brand p{font-size:12px;color:var(--ink-soft);font-weight:400}
+  .back-btn{
+    border:1px solid var(--green-line);background:#fff;color:var(--green-dark);
+    padding:8px 18px;border-radius:9px;font-size:14px;cursor:pointer;
+    text-decoration:none;transition:.15s;
+  }
+  .back-btn:hover{background:var(--green-soft)}
+
+  /* ── 主體 ── */
+  main{max-width:1080px;margin:0 auto;padding:32px 24px 80px}
+  .eyebrow{font-size:13px;color:var(--green);letter-spacing:2px;font-weight:600;margin-bottom:6px}
+  .page-title{font-size:30px;font-weight:800;letter-spacing:.5px;margin-bottom:6px}
+  .page-desc{color:var(--ink-soft);font-size:14px;margin-bottom:28px}
+
+  /* ── 篩選列 ── */
+  .filter-bar{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:20px 22px;display:flex;gap:18px;
+    flex-wrap:wrap;align-items:flex-end;margin-bottom:26px;
+  }
+  .field{display:flex;flex-direction:column;gap:6px;min-width:200px;flex:1}
+  .field label{font-size:13px;color:var(--ink-soft);font-weight:600}
+  select,input[type=text]{
+    font-family:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--line);
+    border-radius:9px;background:#fff;color:var(--ink);transition:.15s;width:100%;
+  }
+  select:focus,input:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  select:disabled{background:#f3f4f1;color:#b3bab1;cursor:not-allowed}
+
+  /* ── 狀態提示 ── */
+  .hint{text-align:center;padding:60px 20px;color:var(--ink-soft)}
+  .hint .big{font-size:15px;margin-bottom:4px;color:var(--ink)}
+  .loading{display:inline-block;width:20px;height:20px;border:2.5px solid var(--green-line);
+    border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ── 團隊清單 ── */
+  .team-count{font-size:13px;color:var(--ink-soft);margin-bottom:12px}
+  .team-count b{color:var(--green-dark)}
+  .team-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;transition:.15s;
+  }
+  .team-card.open{border-color:var(--green-line)}
+  .team-head{
+    padding:16px 20px;cursor:pointer;display:flex;align-items:center;gap:14px;
+    transition:.12s;
+  }
+  .team-head:hover{background:#fafbf9}
+  .team-head .chev{color:var(--ink-soft);transition:.2s;font-size:13px;flex-shrink:0}
+  .team-card.open .chev{transform:rotate(90deg);color:var(--green)}
+  .team-head .info{flex:1;min-width:0}
+  .team-head .tname{font-weight:700;font-size:15px;color:var(--ink)}
+  .team-head .pname{font-size:12.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .badge{
+    font-size:12px;font-weight:600;padding:4px 11px;border-radius:20px;flex-shrink:0;
+    white-space:nowrap;
+  }
+  .badge.exec{background:var(--green-soft);color:var(--green-dark)}
+  .badge.review{background:#eaf0f4;color:var(--blue-grey)}
+  .badge.done{background:#eef0ec;color:#8a948a}
+  .badge.warn{background:var(--amber-soft);color:var(--amber)}
+  .badge.stop{background:#f6e7e4;color:var(--red)}
+  .badge.closed{background:var(--green-dark);color:#fff}
+
+  /* ── 展開內容 ── */
+  .team-body{display:none;border-top:1px solid var(--line);padding:4px 20px 22px}
+  .team-card.open .team-body{display:block}
+  .section{margin-top:20px}
+  .section-title{
+    font-size:13px;font-weight:700;color:var(--green-dark);letter-spacing:1px;
+    display:flex;align-items:center;gap:8px;margin-bottom:14px;
+  }
+  .section-title .num{
+    width:20px;height:20px;border-radius:6px;background:var(--green-soft);color:var(--green-dark);
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;
+  }
+
+  /* 基本資料 grid */
+  .info-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  }
+  .info-cell{background:#fbfcfa;padding:10px 14px}
+  .info-cell .k{font-size:11.5px;color:var(--ink-soft);margin-bottom:2px}
+  .info-cell .v{font-size:13.5px;color:var(--ink);word-break:break-all}
+  .info-cell .v.empty{color:#c3c9c1}
+
+  .resync-row{margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .btn-ghost{
+    border:1px solid var(--green-line);background:#fff;color:var(--green-dark);
+    padding:8px 16px;border-radius:9px;font-size:13px;cursor:pointer;font-family:inherit;transition:.15s;
+  }
+  .btn-ghost:hover{background:var(--green-soft)}
+  .resync-row .note{font-size:12px;color:var(--ink-soft)}
+
+  /* 進度條 */
+  .progress{display:flex;align-items:flex-start;gap:0;flex-wrap:wrap;padding:6px 0}
+  .step{flex:1;min-width:90px;text-align:center;position:relative}
+  .step .dot{
+    width:30px;height:30px;border-radius:50%;background:#eef0ec;border:2px solid var(--line);
+    margin:0 auto 8px;display:flex;align-items:center;justify-content:center;
+    font-size:13px;color:#b6bdb4;position:relative;z-index:2;transition:.2s;
+  }
+  .step.done .dot{background:var(--green);border-color:var(--green);color:#fff}
+  .step.active .dot{background:#fff;border-color:var(--green);color:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .step .lbl{font-size:11.5px;color:var(--ink-soft);line-height:1.35}
+  .step.done .lbl,.step.active .lbl{color:var(--green-dark);font-weight:600}
+  .step:not(:last-child)::after{
+    content:"";position:absolute;top:14px;left:50%;width:100%;height:2px;
+    background:var(--line);z-index:1;
+  }
+  .step.done:not(:last-child)::after{background:var(--green)}
+
+  /* 填寫表單 */
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+  .form-field{display:flex;flex-direction:column;gap:5px}
+  .form-field label{font-size:12.5px;color:var(--ink-soft);font-weight:600}
+  .form-field .locked-tag{font-size:10.5px;color:var(--amber);font-weight:600;margin-left:4px}
+  .form-field input:disabled,.form-field select:disabled{background:#f3f4f1;color:#8a8f87}
+  .form-actions{margin-top:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .btn-save{
+    background:var(--green);color:#fff;border:none;padding:11px 26px;border-radius:9px;
+    font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;
+  }
+  .btn-save:hover{background:var(--green-dark)}
+  .btn-save:disabled{opacity:.5;cursor:not-allowed}
+  .save-msg{font-size:13px}
+  .save-msg.ok{color:var(--green)}
+  .save-msg.err{color:var(--red)}
+
+  /* 執行狀況 log */
+  .log-box{
+    margin-top:8px;background:#fafbf9;border:1px solid var(--line);border-radius:10px;
+    padding:12px 14px;max-height:180px;overflow-y:auto;font-size:12.5px;line-height:1.8;
+  }
+  .log-line{display:flex;gap:6px}
+  .log-line.sys{color:#9aa19a}
+  .log-line.note{color:var(--ink)}
+
+  /* toast */
+  #toast{
+    position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--green-dark);color:#fff;padding:13px 24px;border-radius:10px;
+    font-size:14px;box-shadow:0 8px 24px rgba(40,50,40,.2);opacity:0;pointer-events:none;
+    transition:.25s;z-index:200;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  #toast.err{background:var(--red)}
+
+  @media(max-width:640px){
+    header{padding:14px 16px}
+    .brand h1{font-size:15px}.brand p{font-size:11px}
+    main{padding:22px 14px 60px}
+    .page-title{font-size:24px}
+    .filter-bar{flex-direction:column;align-items:stretch}
+    .field{min-width:0}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">北</div>
+    <div>
+      <h1>地方創生北區輔導中心</h1>
+      <p>Regional Revitalization North Hub</p>
+    </div>
+  </div>
+  <a href="/#internal" class="back-btn">← 返回工作區</a>
+</header>
+
+<main>
+  <div class="eyebrow">內部工作區</div>
+  <h2 class="page-title">過案追蹤</h2>
+  <p class="page-desc">選擇縣市查看過案團隊，點開團隊填寫核定後執行進度。</p>
+
+  <!-- 篩選列 -->
+  <div class="filter-bar">
+    <div class="field">
+      <label for="countySel">縣市</label>
+      <select id="countySel">
+        <option value="">請選擇縣市…</option>
+        <option value="A臺北市">臺北市</option>
+        <option value="B基隆市">基隆市</option>
+        <option value="C新北市">新北市</option>
+        <option value="D桃園市">桃園市</option>
+        <option value="E新竹縣">新竹縣</option>
+        <option value="F新竹市">新竹市</option>
+        <option value="G金門縣">金門縣</option>
+        <option value="H連江縣">連江縣</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="teamSel">團隊（可選）</label>
+      <select id="teamSel" disabled>
+        <option value="">全部團隊</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 結果區 -->
+  <div id="result">
+    <div class="hint">
+      <div class="big">尚未選擇縣市</div>
+      <div>從上方選一個縣市，即可載入過案團隊清單。</div>
+    </div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbwwUcitNoAFIf-TP6ABZrtsrOAAuiKfdOhS9d0tfoZHjl_W4U2sofw8FfXNBbbE81_-/exec';
+
+// 各欄位下拉選項
+const OPTIONS = {
+  reviewStat:  ['', '進行中', '已完成'],
+  reviseStat:  ['', '進行中', '已完成'],
+  approveStat: ['', '進行中', '已完成'],
+  execProg:    ['', '第1期', '第2期', '第3期', '已撤案', '申請未通過'],
+  settlement:  ['', '尚未', '第1期核銷', '第2期核銷', '第3期核銷', '尾款核銷'],
+  payment:     ['', '尚未', '第1期已核撥', '第2期已核撥', '第3期已核撥', '尾款已撥付'],
+  isLocal:     ['', '是', '否'],
+};
+
+let currentCounty = '';
+let allRows = [];   // 該縣市所有資料
+
+const $ = s => document.querySelector(s);
+const countySel = $('#countySel');
+const teamSel   = $('#teamSel');
+const result    = $('#result');
+
+// ── 選縣市 → 載入資料 ──
+countySel.addEventListener('change', () => {
+  currentCounty = countySel.value;
+  teamSel.innerHTML = '<option value="">全部團隊</option>';
+  teamSel.disabled = true;
+  if (!currentCounty) {
+    result.innerHTML = hintHTML('尚未選擇縣市', '從上方選一個縣市，即可載入過案團隊清單。');
+    return;
+  }
+  loadCounty();
+});
+
+// ── 選團隊 → 篩選顯示 ──
+teamSel.addEventListener('change', renderList);
+
+async function loadCounty(){
+  result.innerHTML = `<div class="hint"><div class="loading"></div><div style="margin-top:12px">載入中…</div></div>`;
+  try{
+    const res = await fetch(`${API}?action=read&county=${encodeURIComponent(currentCounty)}`);
+    const data = await res.json();
+    if(!data.ok){ throw new Error(data.error || '讀取失敗'); }
+    allRows = data.rows || [];
+
+    // 填入團隊下拉
+    teamSel.innerHTML = '<option value="">全部團隊</option>';
+    allRows.forEach(r => {
+      const o = document.createElement('option');
+      o.value = r.rowIndex;
+      o.textContent = r.team;
+      teamSel.appendChild(o);
+    });
+    teamSel.disabled = false;
+
+    renderList();
+  }catch(err){
+    result.innerHTML = hintHTML('載入失敗', err.message + '。請重新整理再試一次。');
+  }
+}
+
+function renderList(){
+  const pick = teamSel.value; // rowIndex or ''
+  let rows = allRows;
+  if (pick) rows = allRows.filter(r => String(r.rowIndex) === String(pick));
+
+  if (rows.length === 0){
+    result.innerHTML = hintHTML('此縣市尚無過案資料', '當提案核定後，資料會自動帶入這裡。');
+    return;
+  }
+
+  const countyName = currentCounty.slice(1);
+  let html = `<div class="team-count">${countyName}　共 <b>${rows.length}</b> 個過案團隊</div>`;
+  rows.forEach(r => { html += cardHTML(r); });
+  result.innerHTML = html;
+}
+
+// ── 單張卡片 ──
+function cardHTML(r){
+  const badge = statusBadge(r.status);
+  return `
+  <div class="team-card" data-row="${r.rowIndex}">
+    <div class="team-head" onclick="toggleCard(${r.rowIndex})">
+      <span class="chev">▶</span>
+      <div class="info">
+        <div class="tname">${esc(r.team)}</div>
+        <div class="pname">${esc(r.mainPlan)}</div>
+      </div>
+      ${badge}
+    </div>
+    <div class="team-body" id="body-${r.rowIndex}"></div>
+  </div>`;
+}
+
+function statusBadge(status){
+  if(!status) return '<span class="badge done">未設定</span>';
+  let cls = 'review';
+  if(status==='結案'||status==='已結案') cls='closed';
+  else if(status==='計畫執行中') cls='exec';
+  else if(status==='已撤案'||status==='申請未通過') cls='stop';
+  else if(status.includes('細審')) cls='review';
+  return `<span class="badge ${cls}">${esc(status)}</span>`;
+}
+
+// ── 展開/收合 ──
+function toggleCard(rowIndex){
+  const card = document.querySelector(`.team-card[data-row="${rowIndex}"]`);
+  const wasOpen = card.classList.contains('open');
+  // 關閉其他
+  document.querySelectorAll('.team-card.open').forEach(c => c.classList.remove('open'));
+  if(wasOpen) return;
+  card.classList.add('open');
+  const r = allRows.find(x => String(x.rowIndex)===String(rowIndex));
+  $(`#body-${rowIndex}`).innerHTML = bodyHTML(r);
+}
+
+// ── 展開內容三區 ──
+function bodyHTML(r){
+  return `
+  ${infoSection(r)}
+  ${progressSection(r)}
+  ${formSection(r)}
+  ${logSection(r)}
+  `;
+}
+
+// 區1 基本資料
+function infoSection(r){
+  const cells = [
+    ['年度', r.year],['類別', r.category],['青培站提案', r.isYouth],
+    ['子計畫編號', r.subId],['執行地點', r.location],['主計畫名稱', r.mainPlan],
+    ['子計畫', r.subPlan],['部會', r.ministry],['部會項目', r.ministryItem],
+    ['年期', r.years],['主持人', r.pi],['聯絡人', r.contact],
+    ['聯絡電話', r.phone],['聯絡信箱', r.email],['是否收受電子公文', r.eDoc],
+    ['工作會議', r.meeting],['工作會議次別', r.meetingNo],
+  ];
+  const grid = cells.map(([k,v]) =>
+    `<div class="info-cell"><div class="k">${k}</div><div class="v ${v?'':'empty'}">${v?esc(v):'—'}</div></div>`
+  ).join('');
+  return `
+  <div class="section">
+    <div class="section-title"><span class="num">1</span>基本資料（自動帶入）</div>
+    <div class="info-grid">${grid}</div>
+    <div class="resync-row">
+      <button class="btn-ghost" onclick="doResync(${r.rowIndex})">↻ 從提案表重新同步</button>
+      <span class="note">只會補上目前空白的欄位，不會覆蓋已填內容。</span>
+    </div>
+  </div>`;
+}
+
+// 區2 進度條
+function progressSection(r){
+  const steps = [
+    {lbl:'細部審查', done: r.reviewStat==='已完成', active: r.reviewStat==='進行中'},
+    {lbl:'細部修正', done: r.reviseStat==='已完成', active: r.reviseStat==='進行中'},
+    {lbl:'細部核定', done: r.approveStat==='已完成', active: r.approveStat==='進行中'},
+    {lbl:'執行進度', done: ['第1期','第2期','第3期'].includes(r.execProg), active:false},
+    {lbl:'提送核銷', done: r.settlement && r.settlement!=='尚未', active:false},
+    {lbl:'撥付款項', done: r.payment==='尾款已撥付', active: r.payment && r.payment!=='尚未' && r.payment!=='尾款已撥付'},
+  ];
+  const html = steps.map((s,i)=>{
+    const cls = s.done?'done':(s.active?'active':'');
+    const icon = s.done?'✓':(i+1);
+    return `<div class="step ${cls}"><div class="dot">${icon}</div><div class="lbl">${s.lbl}</div></div>`;
+  }).join('');
+  return `
+  <div class="section">
+    <div class="section-title"><span class="num">2</span>核定後進度</div>
+    <div class="progress">${html}</div>
+  </div>`;
+}
+
+// 區3 填寫更新
+function formSection(r){
+  // 一次性欄位：有值就鎖定
+  const onceField = (key,label,val,type='text') => {
+    const locked = (val!=='' && val!==null && val!==undefined);
+    const lockTag = locked ? '<span class="locked-tag">已鎖定</span>' : '';
+    if(type==='select'){
+      const opts = OPTIONS[key].map(o=>`<option value="${o}" ${String(val)===o?'selected':''}>${o||'請選擇'}</option>`).join('');
+      return `<div class="form-field"><label>${label}${lockTag}</label>
+        <select data-field="${key}" ${locked?'disabled':''}>${opts}</select></div>`;
+    }
+    return `<div class="form-field"><label>${label}${lockTag}</label>
+      <input type="text" data-field="${key}" value="${val?esc(val):''}" ${locked?'disabled':''}></div>`;
+  };
+  const sel = (key,label,val) => {
+    const opts = OPTIONS[key].map(o=>`<option value="${o}" ${String(val)===o?'selected':''}>${o||'請選擇'}</option>`).join('');
+    return `<div class="form-field"><label>${label}</label>
+      <select data-field="${key}">${opts}</select></div>`;
+  };
+  const txt = (key,label,val,ph='') => `<div class="form-field"><label>${label}</label>
+    <input type="text" data-field="${key}" value="${val?esc(val):''}" placeholder="${ph}"></div>`;
+
+  return `
+  <div class="section">
+    <div class="section-title"><span class="num">3</span>填寫更新</div>
+    <div class="form-grid">
+      ${onceField('sysId','系統編號', r.sysId)}
+      ${onceField('isLocal','是否為地創計畫', r.isLocal, 'select')}
+      ${onceField('budget','實際核撥經費', r.budget)}
+      ${onceField('youthName','青培站公司名稱', r.youthName)}
+      ${txt('execYear','執行年度', r.execYear, '例：115')}
+      ${sel('reviewStat','細部計畫審查', r.reviewStat)}
+      ${txt('reviewDate','細部計畫審查日期', r.reviewDate, '2026/05/15')}
+      ${sel('reviseStat','細部計畫修正', r.reviseStat)}
+      ${sel('approveStat','細部計畫核定', r.approveStat)}
+      ${txt('approveDate','細部計畫核定日期', r.approveDate, '2026/05/15')}
+      ${sel('execProg','執行進度', r.execProg)}
+      ${sel('settlement','提送核銷', r.settlement)}
+      ${sel('payment','撥付款項', r.payment)}
+      ${txt('note','輔導備註（特殊狀況）', '', '填寫後會記錄到執行狀況')}
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" onclick="saveRow(${r.rowIndex})">儲存更新</button>
+      <span class="save-msg" id="msg-${r.rowIndex}"></span>
+    </div>
+  </div>`;
+}
+
+// 執行狀況 log
+function logSection(r){
+  const raw = (r.execLog||'').split('\n').filter(l=>l.trim() && l.trim()!=='●');
+  if(raw.length===0) return '';
+  const lines = raw.map(l=>{
+    const isSys = l.includes('[系統]');
+    return `<div class="log-line ${isSys?'sys':'note'}">${esc(l)}</div>`;
+  }).join('');
+  return `
+  <div class="section">
+    <div class="section-title"><span class="num">·</span>執行狀況記錄</div>
+    <div class="log-box">${lines}</div>
+  </div>`;
+}
+
+// ── 儲存：比對有變動的欄位，逐一寫回 ──
+async function saveRow(rowIndex){
+  const card = document.querySelector(`.team-card[data-row="${rowIndex}"]`);
+  const r = allRows.find(x=>String(x.rowIndex)===String(rowIndex));
+  const msg = $(`#msg-${rowIndex}`);
+  const btn = card.querySelector('.btn-save');
+
+  // 收集所有欄位
+  const fields = card.querySelectorAll('[data-field]');
+  const changes = [];
+  let noteVal = '';
+  fields.forEach(f=>{
+    const key = f.dataset.field;
+    const val = f.value;
+    if(key==='note'){ noteVal = val.trim(); return; }
+    if(f.disabled) return; // 鎖定的跳過
+    const old = (r[key]===null||r[key]===undefined)?'':String(r[key]);
+    if(String(val) !== old){
+      changes.push({field:key, value:val});
+    }
+  });
+
+  if(changes.length===0 && !noteVal){
+    msg.textContent = '沒有變更需要儲存';
+    msg.className = 'save-msg';
+    return;
+  }
+
+  btn.disabled = true;
+  msg.textContent = '儲存中…';
+  msg.className = 'save-msg';
+
+  try{
+    // 逐一寫回
+    for(const c of changes){
+      const url = `${API}?action=write&county=${encodeURIComponent(currentCounty)}&rowIndex=${rowIndex}&field=${c.field}&value=${encodeURIComponent(c.value)}`;
+      const res = await fetch(url);
+      const d = await res.json();
+      if(!d.ok) throw new Error(d.error||'寫入失敗');
+    }
+    // 備註
+    if(noteVal){
+      const url = `${API}?action=note&county=${encodeURIComponent(currentCounty)}&rowIndex=${rowIndex}&value=${encodeURIComponent(noteVal)}`;
+      const res = await fetch(url);
+      const d = await res.json();
+      if(!d.ok) throw new Error(d.error||'備註寫入失敗');
+    }
+
+    toast('已儲存更新');
+    // 重新載入該縣市，刷新顯示
+    await loadCounty();
+    // 重新展開這張卡
+    setTimeout(()=>toggleCard(rowIndex), 100);
+  }catch(err){
+    msg.textContent = '儲存失敗：' + err.message;
+    msg.className = 'save-msg err';
+    btn.disabled = false;
+  }
+}
+
+// ── 重新同步 ──
+async function doResync(rowIndex){
+  try{
+    toast('同步中…');
+    const url = `${API}?action=resync&county=${encodeURIComponent(currentCounty)}&rowIndex=${rowIndex}`;
+    const res = await fetch(url);
+    const d = await res.json();
+    if(!d.ok) throw new Error(d.error||'同步失敗');
+    if(d.filled>0){
+      toast(`已補上 ${d.filled} 個欄位`);
+      await loadCounty();
+      setTimeout(()=>toggleCard(rowIndex), 100);
+    }else{
+      toast('沒有可補的空白欄位');
+    }
+  }catch(err){
+    toast('同步失敗：'+err.message, true);
+  }
+}
+
+// ── 小工具 ──
+function hintHTML(big, small){
+  return `<div class="hint"><div class="big">${big}</div><div>${small}</div></div>`;
+}
+function esc(s){
+  return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function toast(msg, isErr){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = isErr?'show err':'show';
+  setTimeout(()=>t.className=t.className.replace('show','').trim(), 2200);
+}
+</script>
+</body>
+</html>
