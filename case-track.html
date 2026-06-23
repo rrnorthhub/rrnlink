@@ -246,6 +246,10 @@
     box-shadow:var(--shadow);padding:22px 24px;margin-bottom:26px;
   }
   .ov-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px}
+  #ovCountySel{padding:8px 14px;border:1px solid var(--line);border-radius:9px;font-family:inherit;font-size:13px;color:var(--ink);background:#fff;cursor:pointer}
+  #ovCountySel:focus{outline:none;border-color:var(--green)}
+  .overview-single{margin-top:18px}
+  .dot-amber{background:var(--amber, #c98a2b) !important}
   .ov-title{font-size:15px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:9px}
   .ov-title .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
   .ov-title .total{font-size:13px;font-weight:400;color:var(--ink-soft);margin-left:4px}
@@ -362,6 +366,29 @@
     </div>
   </div>
 
+  <!-- 個別縣市統計 -->
+  <div class="overview overview-single" id="overviewSingle">
+    <div class="ov-head">
+      <div class="ov-title"><span class="dot dot-amber"></span>個別縣市查詢
+        <span class="total" id="ovSingleTotal"></span>
+      </div>
+      <select id="ovCountySel" onchange="onOvCountyChange()">
+        <option value="">請選擇縣市…</option>
+        <option value="臺北市">臺北市</option>
+        <option value="基隆市">基隆市</option>
+        <option value="新北市">新北市</option>
+        <option value="桃園市">桃園市</option>
+        <option value="新竹縣">新竹縣</option>
+        <option value="新竹市">新竹市</option>
+        <option value="金門縣">金門縣</option>
+        <option value="連江縣">連江縣</option>
+      </select>
+    </div>
+    <div class="stat-grid" id="statGridSingle">
+      <div class="hint" style="grid-column:1/-1;padding:20px;color:var(--ink-soft)">選擇縣市以查看該縣市統計（含歷史案件）</div>
+    </div>
+  </div>
+
   <!-- 篩選列 -->
   <div class="filter-bar">
     <div class="field">
@@ -442,9 +469,15 @@ const STAT_GROUPS = [
 // Excel 用的純文字標籤
 const STAT_LABELS_PLAIN = ['尚未收件','審核中','核定通過(執行中)','已撤案','核定未通過','已結案'];
 
-let allCountyRows = []; // 全部八縣市資料（給統計）
+let allCountyRows = []; // 全部資料（含歷史，給統計）
+let ovFilterCounty = ''; // 總覽篩選縣市（純名稱，空=全部）
 
-// ── 載入全部統計 ──
+function rowCountyName(r){
+  if(r.source==='history') return r.countyName || '';
+  return r.county ? r.county.slice(1) : '';
+}
+
+// ── 載入全部統計（含歷史）──
 async function loadOverview(){
   try{
     const res = await fetch(`${API}?action=readall`);
@@ -459,44 +492,90 @@ async function loadOverview(){
 
 function classifyStatus(status){
   for(const g of STAT_GROUPS){ if(g.match(status)) return g.key; }
-  return 'pending'; // 預設
+  return 'pending';
 }
 
-function renderOverview(){
-  // 計算各分類數量
+function filteredOvRows(){
+  if(!ovFilterCounty) return allCountyRows;
+  return allCountyRows.filter(r=>rowCountyName(r)===ovFilterCounty);
+}
+
+function onOvCountyChange(){
+  ovFilterCounty = $('#ovCountySel').value;
+  renderOverview();
+}
+
+// 通用：依資料算各分類數量並產生卡片HTML
+function buildStatCards(rows, clickFn){
   const counts = {};
   STAT_GROUPS.forEach(g=>counts[g.key]=0);
-  allCountyRows.forEach(r=>{ counts[classifyStatus(r.status)]++; });
-
-  const total = allCountyRows.length;
-  $('#ovTotal').textContent = `· 共 ${total} 案`;
-
-  const cards = STAT_GROUPS.map(g=>{
+  rows.forEach(r=>{ counts[classifyStatus(r.status)]++; });
+  return STAT_GROUPS.map(g=>{
     const n = counts[g.key];
-    return `<div class="stat-card ${n===0?'zero':''}" onclick="showStatList('${g.key}')">
+    return `<div class="stat-card ${n===0?'zero':''}" onclick="${clickFn}('${g.key}')">
       <div class="num">${n}</div>
       <div class="lbl">${g.label}</div>
     </div>`;
   }).join('');
-  $('#statGrid').innerHTML = cards;
 }
 
-// ── 點統計卡片 → 彈窗清單 ──
+// 八縣市總覽（固定全部，不受個別查詢影響）
+function renderOverview(){
+  const rows = allCountyRows;
+  $('#ovTotal').textContent = `· 共 ${rows.length} 案`;
+  $('#statGrid').innerHTML = buildStatCards(rows, 'showStatList');
+  // 若個別區已選縣市，一併刷新
+  if(ovFilterCounty) renderSingle();
+}
+
+// 個別縣市統計
+function onOvCountyChange(){
+  ovFilterCounty = $('#ovCountySel').value;
+  renderSingle();
+}
+
+function renderSingle(){
+  if(!ovFilterCounty){
+    $('#ovSingleTotal').textContent = '';
+    $('#statGridSingle').innerHTML = '<div class="hint" style="grid-column:1/-1;padding:20px;color:var(--ink-soft)">選擇縣市以查看該縣市統計（含歷史案件）</div>';
+    return;
+  }
+  const rows = allCountyRows.filter(r=>rowCountyName(r)===ovFilterCounty);
+  $('#ovSingleTotal').textContent = `· ${ovFilterCounty} 共 ${rows.length} 案`;
+  $('#statGridSingle').innerHTML = buildStatCards(rows, 'showSingleStatList');
+}
+
+// ── 點統計卡片 → 彈窗清單（顯示計畫名稱）──
+// 總覽（全部八縣市）
 function showStatList(key){
+  openStatModal(key, allCountyRows, '');
+}
+// 個別縣市
+function showSingleStatList(key){
+  const rows = allCountyRows.filter(r=>rowCountyName(r)===ovFilterCounty);
+  openStatModal(key, rows, ovFilterCounty ? `${ovFilterCounty}・` : '');
+}
+
+function openStatModal(key, sourceRows, scope){
   const group = STAT_GROUPS.find(g=>g.key===key);
-  const rows = allCountyRows.filter(r=>classifyStatus(r.status)===key);
+  const rows = sourceRows.filter(r=>classifyStatus(r.status)===key);
 
   const plainLabel = group.label.replace(/<br>/g,'');
-  $('#modalTitle').innerHTML = plainLabel + `<span class="cnt" id="modalCnt">共 ${rows.length} 案</span>`;
+  $('#modalTitle').innerHTML = scope + plainLabel + `<span class="cnt" id="modalCnt">共 ${rows.length} 案</span>`;
 
   if(rows.length===0){
     $('#modalBody').innerHTML = '<div class="modal-empty">目前沒有此狀態的過案</div>';
   }else{
-    $('#modalBody').innerHTML = rows.map(r=>`
-      <div class="modal-row">
-        <div class="mc">${esc(r.county.slice(1))}</div>
-        <div class="mt">${esc(r.team)}<span class="mp">${esc(r.mainPlan)}</span></div>
-      </div>`).join('');
+    $('#modalBody').innerHTML = rows.map(r=>{
+      const cn = rowCountyName(r);
+      const histTag = r.source==='history' ? '<span style="font-size:11px;color:#a89f96;margin-left:6px">（歷史）</span>' : '';
+      const name = r.mainPlan || r.team || '（未命名）';
+      const teamLine = r.team ? `<span class="mp">${esc(r.team)}</span>` : '';
+      return `<div class="modal-row">
+        <div class="mc">${esc(cn)}${histTag}</div>
+        <div class="mt">${esc(name)}${teamLine}</div>
+      </div>`;
+    }).join('');
   }
   $('#modalMask').classList.add('show');
 }
@@ -505,30 +584,28 @@ function closeModal(e){
   $('#modalMask').classList.remove('show');
 }
 
-// ── 匯出 Excel（縣市 × 狀態 交叉表）──
+// ── 匯出 Excel（縣市 × 狀態 交叉表，含歷史案件）──
 function exportExcel(){
   if(allCountyRows.length===0){ toast('統計尚未載入完成', true); return; }
 
-  const counties = ['A臺北市','B基隆市','C新北市','D桃園市','E新竹縣','F新竹市','G金門縣','H連江縣'];
-  // 建立交叉統計
-  const matrix = {}; // county → {key:count}
-  counties.forEach(c=>{ matrix[c]={}; STAT_GROUPS.forEach(g=>matrix[c][g.key]=0); });
+  const countyNames = ['臺北市','基隆市','新北市','桃園市','新竹縣','新竹市','金門縣','連江縣'];
+  // 交叉統計：用純縣市名（活案+歷史合計）
+  const matrix = {};
+  countyNames.forEach(c=>{ matrix[c]={}; STAT_GROUPS.forEach(g=>matrix[c][g.key]=0); });
   allCountyRows.forEach(r=>{
-    if(matrix[r.county]) matrix[r.county][classifyStatus(r.status)]++;
+    const cn = rowCountyName(r);
+    if(matrix[cn]) matrix[cn][classifyStatus(r.status)]++;
   });
 
-  // 表頭
   const header = ['縣市', ...STAT_LABELS_PLAIN, '合計'];
   const aoa = [header];
-
-  // 各縣市列
   const colTotals = STAT_GROUPS.map(()=>0);
   let grandTotal = 0;
-  counties.forEach(c=>{
-    const row = [c.slice(1)];
+  countyNames.forEach(cn=>{
+    const row = [cn];
     let rowTotal = 0;
     STAT_GROUPS.forEach((g,i)=>{
-      const n = matrix[c][g.key];
+      const n = matrix[cn][g.key];
       row.push(n);
       colTotals[i]+=n;
       rowTotal+=n;
@@ -537,20 +614,17 @@ function exportExcel(){
     grandTotal+=rowTotal;
     aoa.push(row);
   });
-  // 總計列
   aoa.push(['總計', ...colTotals, grandTotal]);
 
-  // 產生工作表
   const ws = XLSX.utils.aoa_to_sheet(aoa);
   ws['!cols'] = [{wch:10},{wch:10},{wch:10},{wch:14},{wch:8},{wch:12},{wch:8},{wch:8}];
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, '過案統計');
+  XLSX.utils.book_append_sheet(wb, ws, '過案統計(含歷史)');
 
-  // 檔名加日期
   const d = new Date();
-  const ymd = d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
-  XLSX.writeFile(wb, `過案統計_${ymd}.xlsx`);
-  toast('Excel 已下載');
+  const roc = (d.getFullYear()-1911) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+  XLSX.writeFile(wb, `過案統計_含歷史_${roc}.xlsx`);
+  toast('Excel 已下載（含歷史案件）');
 }
 
 
