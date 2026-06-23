@@ -360,6 +360,7 @@
     <div class="ov-head">
       <div class="ov-title"><span class="dot"></span>八縣市過案總覽 <span class="total" id="ovTotal"></span></div>
       <button class="btn-export" onclick="exportExcel()">⬇ 匯出 Excel 報表</button>
+      <button class="btn-export" onclick="exportDetailExcel(event)">⬇ 匯出過案明細</button>
     </div>
     <div class="stat-grid" id="statGrid">
       <div class="hint" style="grid-column:1/-1;padding:20px"><span class="loading"></span> 載入統計中…</div>
@@ -625,6 +626,49 @@ function exportExcel(){
   const roc = (d.getFullYear()-1911) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
   XLSX.writeFile(wb, `過案統計_含歷史_${roc}.xlsx`);
   toast('Excel 已下載（含歷史案件）');
+}
+
+
+// ── 匯出過案明細（逐案精選欄位，活案+歷史，含縣市區分）──
+async function exportDetailExcel(ev){
+  const btn = ev && ev.target;
+  if(btn){ btn.disabled = true; btn.dataset.old = btn.textContent; btn.textContent = '匯出中…'; }
+  try{
+    const res = await fetch(`${API}?action=readdetail`);
+    const data = await res.json();
+    if(!data.ok){ toast('讀取明細失敗：' + (data.error||''), true); return; }
+    if(!data.detail || data.detail.length === 0){ toast('查無明細資料', true); return; }
+
+    // 表頭：縣市、來源 + 後端回傳的 fields（DETAIL_FIELDS 改動會自動跟著變）
+    const headers = ['縣市', '來源', ...data.fields];
+    const aoa = [headers];
+    data.detail.forEach(rec => {
+      aoa.push(headers.map(h => {
+        const v = rec[h];
+        return (v === null || v === undefined) ? '' : v;
+      }));
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    // 欄寬：縣市/來源窄，計畫名稱/執行狀況寬
+    ws['!cols'] = headers.map(h => {
+      if(h === '主計畫名稱' || h === '執行狀況' || h === '執行地點' || h === '聯絡信箱') return {wch:24};
+      if(h === '子計畫團隊' || h === '部會項目') return {wch:18};
+      if(h === '縣市' || h === '來源') return {wch:8};
+      return {wch:12};
+    });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '過案明細');
+
+    const d = new Date();
+    const roc = (d.getFullYear()-1911) + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+    XLSX.writeFile(wb, `過案明細_${roc}.xlsx`);
+    toast(`過案明細已下載（共 ${data.detail.length} 案）`);
+  }catch(e){
+    toast('匯出失敗：' + e.message, true);
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = btn.dataset.old || '⬇ 匯出過案明細'; }
+  }
 }
 
 
