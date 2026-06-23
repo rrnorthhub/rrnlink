@@ -629,6 +629,22 @@ function exportExcel(){
 }
 
 
+// ── 經費單位統一：小於門檻視為「萬元」×10000，否則視為「元」 ──
+const BUDGET_WAN_THRESHOLD = 10000; // 分界值，要調整改這裡
+function normBudget(v){
+  if(v === '' || v === null || v === undefined) return '';
+  const s = String(v).trim();
+  if(s === '') return '';
+  const hasWan = /萬/.test(s);                 // 若原值就寫了「萬」
+  const num = parseFloat(s.replace(/[^0-9.\-]/g, '')); // 去逗號/元/萬/NT$等
+  if(isNaN(num)) return v;                      // 非數字（如文字備註）原樣保留
+  let yuan;
+  if(hasWan) yuan = Math.round(num * 10000);
+  else if(num < BUDGET_WAN_THRESHOLD) yuan = Math.round(num * 10000);
+  else yuan = Math.round(num);
+  return yuan;                                  // 回傳純數字（元），Excel 可加總
+}
+
 // ── 匯出過案明細（逐案精選欄位，活案+歷史，含縣市區分）──
 async function exportDetailExcel(ev){
   const btn = ev && ev.target;
@@ -644,7 +660,8 @@ async function exportDetailExcel(ev){
     const aoa = [headers];
     data.detail.forEach(rec => {
       aoa.push(headers.map(h => {
-        const v = rec[h];
+        let v = rec[h];
+        if(h === '實際核撥經費') return normBudget(v); // 統一成元
         return (v === null || v === undefined) ? '' : v;
       }));
     });
