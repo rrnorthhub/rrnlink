@@ -88,6 +88,7 @@
   .plan-info{flex:1;min-width:0}
   .plan-title-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
   .plan-code{font-size:12px;font-weight:700;color:var(--green-dark);background:var(--green-soft);padding:2px 9px;border-radius:6px;flex-shrink:0;letter-spacing:.3px}
+  .plan-code.nocode{color:var(--amber);background:var(--amber-soft)}
   .plan-name{font-weight:700;font-size:16px;color:var(--ink)}
   .plan-meta{font-size:12.5px;color:var(--ink-soft);display:flex;gap:14px;flex-wrap:wrap}
   .plan-meta .sep{color:var(--line)}
@@ -501,11 +502,6 @@ function filteredOvRows(){
   return allCountyRows.filter(r=>rowCountyName(r)===ovFilterCounty);
 }
 
-function onOvCountyChange(){
-  ovFilterCounty = $('#ovCountySel').value;
-  renderOverview();
-}
-
 // 通用：依資料算各分類數量並產生卡片HTML
 function buildStatCards(rows, clickFn){
   const counts = {};
@@ -730,6 +726,16 @@ async function loadCounty(){
 
 const CLOSED_SET = ['結案','已結案','已撤案','申請未通過'];
 
+// ── 分組鍵：有主編號(main, G欄)就用編號；沒編號則退回用「主計畫名稱」──
+// 這樣多筆「編號空白」的不同主計畫，不會全部被塞進同一組
+function groupKeyOf(r){
+  const code = String(r.main || '').replace(/\s+/g,'');
+  if(code) return 'C::' + code;                      // 有編號
+  const name = String(r.mainPlan || '').replace(/\s+/g,'');
+  if(name) return 'N::' + name;                      // 無編號 → 用主計畫名稱
+  return 'X::未分類';                                 // 連名稱都沒有
+}
+
 function renderList(){
   const pick = teamSel.value; // rowIndex or ''
 
@@ -738,51 +744,66 @@ function renderList(){
     return;
   }
 
-  // 依主編號(main, G欄)分組
+  // 分組
   const groups = {};
   const order = [];
   allRows.forEach(r => {
-    const code = String(r.main || '未分類').replace(/\s+/g,'');
-    if(!groups[code]){ groups[code]=[]; order.push(code); }
-    groups[code].push(r);
+    const key = groupKeyOf(r);
+    if(!groups[key]){ groups[key]=[]; order.push(key); }
+    groups[key].push(r);
   });
 
-  // 若有指定團隊，只顯示該團隊所屬群組、並只展開該團隊
-  let showCodes = order;
+  // 若有指定團隊，只顯示該團隊所屬群組
+  let showKeys = order;
   if(pick){
     const target = allRows.find(r=>String(r.rowIndex)===String(pick));
     if(target){
-      const tc = String(target.main||'未分類').replace(/\s+/g,'');
-      showCodes = [tc];
+      showKeys = [groupKeyOf(target)];
     }
   }
 
   const countyName = currentCounty.slice(1);
   let html = `<div class="team-count">${countyName}　共 <b>${order.length}</b> 個主計畫</div>`;
-  showCodes.forEach(code => { html += groupHTML(code, groups[code]); });
+  showKeys.forEach(key => { html += groupHTML(key, groups[key]); });
   result.innerHTML = html;
 }
 
 // ── 主計畫群組 ──
-function groupHTML(code, subs){
+// key 是分組鍵（C::編號 或 N::名稱），非真正的主計畫編號
+function groupHTML(key, subs){
   const planName = subs[0].mainPlan || '（無主計畫名稱）';
+  // 真正的主計畫編號（歸檔比對用）；同組理論上一致，取第一筆
+  const realCode = String(subs[0].main || '').replace(/\s+/g,'');
+  const hasCode  = !!realCode;
+  // 卡片上顯示的編號標籤：沒編號就顯示「未編號」
+  const codeLabel = hasCode ? realCode : '未編號';
+
   const allClosed = subs.every(s => CLOSED_SET.includes(s.status));
   const execCount = subs.filter(s=>s.status==='計畫執行中').length;
   const summary = allClosed ? '全部結束' : (execCount>0 ? `執行中 ${execCount}/${subs.length}` : '進行中');
 
   const subsHtml = subs.map(s => subCardHTML(s)).join('');
 
-  const archiveBtn = allClosed
-    ? `<button class="archive-btn ready" onclick="event.stopPropagation();doArchive('${esc(code)}')">✓ 執行歸檔</button>`
-    : `<button class="archive-btn locked" onclick="event.stopPropagation();lockedHint('${esc(code)}',${subs.length-subs.filter(s=>CLOSED_SET.includes(s.status)).length})">尚未可歸檔</button>`;
+  // 歸檔按鈕：必須有真編號才能歸檔（後端用 G欄主編號比對）
+  let archiveBtn;
+  if(!hasCode){
+    archiveBtn = `<button class="archive-btn locked" onclick="event.stopPropagation();toast('此主計畫在後台缺少主計畫編號(G欄)，請先補上編號才能歸檔',true)">缺編號·不可歸檔</button>`;
+  }else if(allClosed){
+    archiveBtn = `<button class="archive-btn ready" onclick="event.stopPropagation();doArchive('${esc(realCode)}')">✓ 執行歸檔</button>`;
+  }else{
+    const notClosed = subs.length - subs.filter(s=>CLOSED_SET.includes(s.status)).length;
+    archiveBtn = `<button class="archive-btn locked" onclick="event.stopPropagation();lockedHint('${esc(realCode)}',${notClosed})">尚未可歸檔</button>`;
+  }
+
+  const codeCls = hasCode ? 'plan-code' : 'plan-code nocode';
 
   return `
-  <div class="plan-group ${allClosed?'archivable':''}" data-code="${esc(code)}">
-    <div class="plan-head" onclick="toggleGroup('${esc(code)}')">
+  <div class="plan-group ${allClosed&&hasCode?'archivable':''}" data-key="${esc(key)}">
+    <div class="plan-head" onclick="toggleGroup('${esc(key)}')">
       <span class="plan-chev">▶</span>
       <div class="plan-info">
         <div class="plan-title-row">
-          <span class="plan-code">${esc(code)}</span>
+          <span class="${codeCls}">${esc(codeLabel)}</span>
           <span class="plan-name">${esc(planName)}</span>
         </div>
         <div class="plan-meta">
@@ -812,8 +833,8 @@ function subCardHTML(r){
   </div>`;
 }
 
-function toggleGroup(code){
-  const g = document.querySelector(`.plan-group[data-code="${code}"]`);
+function toggleGroup(key){
+  const g = document.querySelector(`.plan-group[data-key="${CSS.escape(key)}"]`);
   if(g) g.classList.toggle('open');
 }
 
